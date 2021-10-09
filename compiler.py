@@ -13,4 +13,10 @@ class Reader:
         return c
 
     def revert(self, index):
-        self.f.seek(index)
+        self.character_index = self.character_index-index
+        self.f.seek(self.character_index)
+
+
+assert len(sys.argv) == 2
+file_name = sys.argv[1]
+r = Reader(file_name)
