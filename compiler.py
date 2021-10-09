@@ -4,7 +4,7 @@ from enum import Enum
 KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
 SYMBOLS = [';', ':', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
-
+LINE = 1
 
 class Reader:
 
@@ -39,30 +39,32 @@ class ScannerResult:
         self.lexical_errors = []
         self.symbol_table = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
         self.tokens = []
-        self.line = 1
+        self.index = 0
 
-    def add(self, l, info):
-        if len(l) >= self.line:
-            l[self.line - 1] += f' {info}'
+    def add(self, l, token):
+        if len(l) > self.index:
+            l[self.index].append(token)
         else:
-            l.append(info)
+            l.append([token])
 
     def write_into_file(self):
         self.write(self.tokens, 'tokens.txt')
         self.write(self.lexical_errors, 'lexical_errors.txt', empty_message='There is no lexical error.')
-        self.write(self.symbol_table, 'symbol_table.txt')
+        self.write(self.symbol_table, 'symbol_table.txt', is_list=False)
 
     def newLine(self):
-        self.line += 1
+        self.index += 1
 
     @classmethod
-    def write(cls, output, file, empty_message=""):
-        line = 1
+    def write(cls, output, file, empty_message="", is_list=True):
         f = open(file, "w")
         if output:
-            for item in output:
-                f.writelines(f'{line}.\t{item} \n')
-                line += 1
+            if is_list:
+                for item in output:
+                    f.writelines(f'{item[0].line}.\t{str(item)[1:-1]} \n')
+            else:
+                for num, item in enumerate(output, 1):
+                    f.writelines(f'{num}.\t{item}\n')
         else:
             f.write(empty_message)
         f.close()
@@ -77,12 +79,14 @@ class State(Enum):
 
 
 class Token:
-    type = TokenType.UNKNOWN
-    content = ''
-    line = 1
+
+    def __init__(self):
+        self.type = TokenType.UNKNOWN
+        self.content = ''
+        self.line = LINE
 
     def __repr__(self):
-        return f'({self.type.name} {self.content})'
+        return f'({self.type.name}, {self.content})'
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
@@ -140,12 +144,16 @@ def get_next_token(reader: Reader, result: ScannerResult):
             token.type = TokenType.KEYWORD
 
     if token.type != TokenType.UNKNOWN:
-        result.add(result.tokens, token.__repr__())
+        result.add(result.tokens, token)
 
     if token.type == TokenType.ID and not result.symbol_table.__contains__(token.content):
         result.symbol_table.append(token.content)
+
     if c == '\n':
+        global LINE
+        LINE += 1
         result.newLine()
+
     return c != ''
 
 
