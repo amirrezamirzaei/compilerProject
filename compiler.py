@@ -56,11 +56,11 @@ class ScannerResult:
 
 
 class TokenType(Enum):
-    ID, NUM, KEYWORD, UNKNOWN = range(3)
+    NUM, ID, KEYWORD, SYMBOL, COMMENT, WHITESPACE = range(6)
 
 
 class State(Enum):
-    START, ID, NUM, SYMBOL, COMMENT, END = range(3)
+    START, NUM, ID, SYMBOL, COMMENT, WHITESPACE, END = range(7)
 
 
 class Token:
@@ -89,14 +89,22 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 pass
         elif state == state.NUM:
             pass
-        else:
+        elif state == state.ID:
             pass
+        elif state == state.SYMBOL:
+            pass
+        elif state == state.COMMENT:
+            pass
+        elif state == state.WHITESPACE:
+            pass
+
 
     if token.Type == TokenType.ID:
         if token.content in KEYWORDS:
             token.Type = TokenType.KEYWORD
 
-    return token.__repr__()
+    result.add(result.tokens, token.__repr__())
+    return True
 
 
 
