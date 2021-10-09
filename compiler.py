@@ -2,7 +2,7 @@ import sys
 from enum import Enum
 
 KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
-SYMBOLS = [';', ':', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
+SYMBOLS = [';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 LINE = 1
 
