@@ -3,7 +3,7 @@ from enum import Enum
 
 KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'main']
 SYMBOLS = [';', ':', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
-WHITESPACE = [' ', '\n', '\r', '\t', '\v', 'f']
+WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 
 
 class Reader:
@@ -79,42 +79,59 @@ def get_next_token(reader: Reader, result: ScannerResult):
 
     while state != State.END:
         c = reader.get_next_character()
-
         if c in WHITESPACE or c == '':
             state = State.END
-            if c == '\n':
-                result.newLine()
             continue
 
         token.content += c
+
         if state == State.START:
             if c.isalpha():
+                state = State.ID
                 token.type = TokenType.ID
             elif c.isdigit():
+                state = State.NUM
                 token.type = TokenType.NUM
             elif c in SYMBOLS:
-                token.Type = TokenType.SYMBOL
+                state = State.SYMBOL
+                token.type = TokenType.SYMBOL
+            elif c == '/':
+                pass
             else:
-                token.Type = TokenType.ERROR
+                token.type = TokenType.ERROR
+
         elif state == state.NUM:
             if not c.isdigit():
-                pass
+                if c.isalpha():
+                    pass  # todo error invalid number
+                reader.revert(1)
+                token.content = token.content[:-1]
+                state = State.END
+
         elif state == state.ID:
             if not c.isalnum():
-                pass
+                reader.revert(1)
+                token.content = token.content[:-1]
+                state = State.END
+
         elif state == state.SYMBOL:
-            if not (c == '=' and token.content == '='):
-                pass
+            if not token.content == '==':
+                reader.revert(1)
+                token.content = token.content[:-1]
+                state = State.END
+
         elif state == state.COMMENT:
             pass
-        else:
-            if c in WHITESPACE:
-                state = State.END
+
     if token.type == TokenType.ID:
         if token.content in KEYWORDS:
-            token.Type = TokenType.KEYWORD
+            token.type = TokenType.KEYWORD
+
     if token.type != TokenType.UNKNOWN:
         result.add(result.tokens, token.__repr__())
+
+    if c == '\n':
+        result.newLine()
     return c != ''
 
 
