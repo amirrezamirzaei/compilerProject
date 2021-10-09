@@ -6,6 +6,7 @@ SYMBOLS = [';', ':', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<'
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 LINE = 1
 
+
 class Reader:
 
     def __init__(self, file_name: str):
@@ -42,8 +43,8 @@ class ScannerResult:
         self.index = 0
 
     def add(self, l, token):
-        if len(l) > self.index:
-            l[self.index].append(token)
+        if l and l[len(l) - 1][0].line == token.line:
+            l[len(l) - 1].append(token)
         else:
             l.append([token])
 
@@ -52,16 +53,16 @@ class ScannerResult:
         self.write(self.lexical_errors, 'lexical_errors.txt', empty_message='There is no lexical error.')
         self.write(self.symbol_table, 'symbol_table.txt', is_list=False)
 
-    def newLine(self):
-        self.index += 1
-
     @classmethod
     def write(cls, output, file, empty_message="", is_list=True):
         f = open(file, "w")
         if output:
             if is_list:
                 for item in output:
-                    f.writelines(f'{item[0].line}.\t{str(item)[1:-1]} \n')
+                    out = ''
+                    for token in item:
+                        out += f'{token.__repr__()} '
+                    f.writelines(f'{item[0].line}.\t{out}\n')
             else:
                 for num, item in enumerate(output, 1):
                     f.writelines(f'{num}.\t{item}\n')
@@ -152,12 +153,10 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if c == '\n':
         global LINE
         LINE += 1
-        result.newLine()
 
     return c != ''
 
 
-assert len(sys.argv) == 2
 file_name = sys.argv[1]
 r = Reader(file_name)
 out = ScannerResult()
