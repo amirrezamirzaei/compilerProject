@@ -1,6 +1,8 @@
 import sys
 from enum import Enum
 
+KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'main']
+
 
 class Reader:
 
@@ -54,11 +56,11 @@ class ScannerResult:
 
 
 class TokenType(Enum):
-    ID, NUM, UNKNOWN = range(3)
+    ID, NUM, KEYWORD, UNKNOWN = range(3)
 
 
 class State(Enum):
-    START, ID, NUM, SYMBOL, COMMENT = range(3)
+    START, ID, NUM, SYMBOL, COMMENT, END = range(3)
 
 
 class Token:
@@ -66,12 +68,14 @@ class Token:
     content = ''
 
     def __repr__(self):
-        pass
+        return f'({self.Type} {self.content})'
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
     state = State.START
-    while state != State.done:
+    token = Token()
+
+    while state != State.END:
         c = reader.get_next_character()
         if c == '':  # EOF
             return False
@@ -83,25 +87,17 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 pass
             else:
                 pass
-    if state == State.ID:
-        if state.content == 'if':
+        elif state == state.NUM:
             pass
-        elif state.content == 'else':
+        else:
             pass
-        elif state.content == 'void':
-            pass
-        elif state.content == 'int':
-            pass
-        elif state.content == 'repeat':
-            pass
-        elif state.content == 'break':
-            pass
-        elif state.content == 'until':
-            pass
-        elif state.content == 'return':
-            pass
-        elif state.content == 'main':
-            pass
+
+    if token.Type == TokenType.ID:
+        if token.content in KEYWORDS:
+            token.Type = TokenType.KEYWORD
+
+    return token.__repr__()
+
 
 
 assert len(sys.argv) == 2
