@@ -58,7 +58,7 @@ class TokenType(Enum):
 
 
 class State(Enum):
-    ID, COMMENT, SYMBOL = range(3)
+    START, ID, COMMENT, SYMBOL = range(3)
 
 
 class Token:
@@ -67,15 +67,30 @@ class Token:
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
-    result.add(result.tokens, '(KEYWORD, void)')
-    result.add(result.tokens, '(ID, main)')
-    result.add(result.tokens, '(SYMBOL, ()')
-    result.add(result.tokens, '(KEYWORD, void)')
-    result.add(result.tokens, '(SYMBOL, ))')
-    result.add(result.tokens, '(SYMBOL, {)')
-    result.newLine()
-    result.add(result.tokens, '(KEYWORD, int)')
-    return False
+    state = State.START
+    while state != State.done:
+        c = reader.get_next_character()
+        if c == '':  # EOF
+            return False
+    if state == State.ID:
+        if state.content == 'if':
+            pass
+        elif state.content == 'else':
+            pass
+        elif state.content == 'void':
+            pass
+        elif state.content == 'int':
+            pass
+        elif state.content == 'repeat':
+            pass
+        elif state.content == 'break':
+            pass
+        elif state.content == 'until':
+            pass
+        elif state.content == 'return':
+            pass
+        elif state.content == 'main':
+            pass
 
 
 assert len(sys.argv) == 2
