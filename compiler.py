@@ -58,12 +58,15 @@ class TokenType(Enum):
 
 
 class State(Enum):
-    START, ID, COMMENT, SYMBOL = range(3)
+    START, ID, NUM, SYMBOL, COMMENT = range(3)
 
 
 class Token:
     Type = TokenType.UNKNOWN
     content = ''
+
+    def __repr__(self):
+        pass
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
@@ -72,6 +75,14 @@ def get_next_token(reader: Reader, result: ScannerResult):
         c = reader.get_next_character()
         if c == '':  # EOF
             return False
+
+        if state == State.START:
+            if c.isalpha():
+                pass
+            elif c.isdigit():
+                pass
+            else:
+                pass
     if state == State.ID:
         if state.content == 'if':
             pass
