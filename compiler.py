@@ -2,6 +2,8 @@ import sys
 from enum import Enum
 
 KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'main']
+SYMBOLS = [';', ':', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
+WHITESPACE = [' ', '\n', '\r', '\t', '\v', 'f']
 
 
 class Reader:
@@ -56,19 +58,19 @@ class ScannerResult:
 
 
 class TokenType(Enum):
-    NUM, ID, KEYWORD, SYMBOL, COMMENT, WHITESPACE = range(6)
+    NUM, ID, KEYWORD, SYMBOL, COMMENT, ERROR, UNKNOWN = range(7)
 
 
 class State(Enum):
-    START, NUM, ID, SYMBOL, COMMENT, WHITESPACE, END = range(7)
+    START, NUM, ID, SYMBOL, COMMENT, END = range(6)
 
 
 class Token:
-    Type = TokenType.UNKNOWN
+    type = TokenType.UNKNOWN
     content = ''
 
     def __repr__(self):
-        return f'({self.Type} {self.content})'
+        return f'({self.type.name} {self.content})'
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
@@ -77,35 +79,43 @@ def get_next_token(reader: Reader, result: ScannerResult):
 
     while state != State.END:
         c = reader.get_next_character()
-        if c == '':  # EOF
-            return False
 
+        if c in WHITESPACE or c == '':
+            state = State.END
+            if c == '\n':
+                result.newLine()
+            continue
+
+        token.content += c
         if state == State.START:
             if c.isalpha():
-                pass
+                token.type = TokenType.ID
             elif c.isdigit():
-                pass
+                token.type = TokenType.NUM
+            elif c in SYMBOLS:
+                token.Type = TokenType.SYMBOL
             else:
-                pass
+                token.Type = TokenType.ERROR
         elif state == state.NUM:
-            pass
+            if not c.isdigit():
+                pass
         elif state == state.ID:
-            pass
+            if not c.isalnum():
+                pass
         elif state == state.SYMBOL:
-            pass
+            if not (c == '=' and token.content == '='):
+                pass
         elif state == state.COMMENT:
             pass
-        elif state == state.WHITESPACE:
-            pass
-
-
-    if token.Type == TokenType.ID:
+        else:
+            if c in WHITESPACE:
+                state = State.END
+    if token.type == TokenType.ID:
         if token.content in KEYWORDS:
             token.Type = TokenType.KEYWORD
-
-    result.add(result.tokens, token.__repr__())
-    return True
-
+    if token.type != TokenType.UNKNOWN:
+        result.add(result.tokens, token.__repr__())
+    return c != ''
 
 
 assert len(sys.argv) == 2
