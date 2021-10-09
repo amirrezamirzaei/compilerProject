@@ -53,8 +53,17 @@ class ScannerResult:
         f.close()
 
 
-class States(Enum):
+class TokenType(Enum):
+    ID, NUM, UNKNOWN = range(3)
+
+
+class State(Enum):
     ID, COMMENT, SYMBOL = range(3)
+
+
+class Token:
+    Type = TokenType.UNKNOWN
+    content = ''
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
