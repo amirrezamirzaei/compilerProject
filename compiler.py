@@ -130,6 +130,8 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if token.type != TokenType.UNKNOWN:
         result.add(result.tokens, token.__repr__())
 
+    if token.type == TokenType.ID and not result.symbol_table.__contains__(token.content):
+        result.symbol_table.append(token.content)
     if c == '\n':
         result.newLine()
     return c != ''
