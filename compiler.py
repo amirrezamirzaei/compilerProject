@@ -1,7 +1,7 @@
 import sys
 from enum import Enum
 
-KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'main']
+KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
 SYMBOLS = [';', ':', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 
@@ -11,11 +11,22 @@ class Reader:
     def __init__(self, file_name: str):
         self.f = open(file_name, "r")
         self.character_index = 0
+        self.line = 0
+        self.current_character = ''
 
     def get_next_character(self):
         c = self.f.read(1)
+        if c == '\n':
+            self.line += 1
         self.character_index = self.f.tell()
+        self.current_character = c
         return c
+
+    def revert_single_character(self):
+        if self.current_character == '\n':
+            self.line -= 1
+        self.character_index = self.character_index - 1
+        self.f.seek(self.character_index)
 
     def revert(self, index: int):
         self.character_index = self.character_index - index
@@ -26,7 +37,7 @@ class ScannerResult:
 
     def __init__(self):
         self.lexical_errors = []
-        self.symbol_table = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'main']
+        self.symbol_table = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
         self.tokens = []
         self.line = 1
 
@@ -68,6 +79,7 @@ class State(Enum):
 class Token:
     type = TokenType.UNKNOWN
     content = ''
+    line = 1
 
     def __repr__(self):
         return f'({self.type.name} {self.content})'
@@ -104,19 +116,19 @@ def get_next_token(reader: Reader, result: ScannerResult):
             if not c.isdigit():
                 if c.isalpha():
                     pass  # todo error invalid number
-                reader.revert(1)
+                reader.revert_single_character()
                 token.content = token.content[:-1]
                 state = State.END
 
         elif state == state.ID:
             if not c.isalnum():
-                reader.revert(1)
+                reader.revert_single_character()
                 token.content = token.content[:-1]
                 state = State.END
 
         elif state == state.SYMBOL:
             if not token.content == '==':
-                reader.revert(1)
+                reader.revert_single_character()
                 token.content = token.content[:-1]
                 state = State.END
 
