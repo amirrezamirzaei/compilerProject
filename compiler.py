@@ -72,11 +72,11 @@ class ScannerResult:
 
 
 class TokenType(Enum):
-    NUM, ID, KEYWORD, SYMBOL, COMMENT, ERROR, UNKNOWN = range(7)
+    NUM, ID, KEYWORD, SYMBOL, COMMENT, UNKNOWN, ERROR = range(7)
 
 
 class State(Enum):
-    START, NUM, ID, SYMBOL, COMMENT, END = range(6)
+    START, NUM, ID, SYMBOL, ONE_LINE_COMMENT, MULTI_LINE_COMMENT, END, ERROR = range(8)
 
 
 class Token:
@@ -84,11 +84,18 @@ class Token:
     def __init__(self):
         self.type = TokenType.UNKNOWN
         self.content = ''
+        self.error = ''
         self.line = LINE
 
     def __repr__(self):
-        return f'({self.type.name}, {self.content})'
+        if self.type != TokenType.ERROR:
+            return f'({self.type.name}, {self.content})'
+        else:
+            return f'({self.content}, {self.error})'
 
+
+def is_accepted_character(c):
+    return c.isalnum() or c in SYMBOLS or c in WHITESPACE
 
 def get_next_token(reader: Reader, result: ScannerResult):
     state = State.START
@@ -116,36 +123,50 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 pass
             else:
                 token.type = TokenType.ERROR
+                token.error = 'Invalid input'
+                state = state.END
 
-        elif state == state.NUM:
+        elif state == State.NUM:
             if not c.isdigit():
                 if c.isalpha():
-                    pass  # todo error invalid number
+                    state = State.END
+                    token.type = TokenType.ERROR
+                    token.error = 'Invalid number'
+                else:
+                    reader.revert_single_character()
+                    token.content = token.content[:-1]
+                    state = State.END
+
+        elif state == State.ID:
+            if not c.isalnum() and is_accepted_character(c):
                 reader.revert_single_character()
                 token.content = token.content[:-1]
-                state = State.END
+                state = state.END
+            elif not is_accepted_character(c):
+                token.type = TokenType.ERROR
+                token.error = 'Invalid input'
+                state = state.END
 
-        elif state == state.ID:
-            if not c.isalnum():
-                reader.revert_single_character()
-                token.content = token.content[:-1]
-                state = State.END
-
-        elif state == state.SYMBOL:
+        elif state == State.SYMBOL:
             if not token.content == '==':
                 reader.revert_single_character()
                 token.content = token.content[:-1]
                 state = State.END
 
-        elif state == state.COMMENT:
+        elif state == State.ONE_LINE_COMMENT:
+            pass
+
+        elif state == State.MULTI_LINE_COMMENT:
             pass
 
     if token.type == TokenType.ID:
         if token.content in KEYWORDS:
             token.type = TokenType.KEYWORD
 
-    if token.type != TokenType.UNKNOWN:
+    if token.type != TokenType.ERROR and token.type != TokenType.UNKNOWN:
         result.add(result.tokens, token)
+    elif token.type == TokenType.ERROR:
+        result.add(result.lexical_errors, token)
 
     if token.type == TokenType.ID and not result.symbol_table.__contains__(token.content):
         result.symbol_table.append(token.content)
