@@ -10,28 +10,22 @@ LINE = 1
 class Reader:
 
     def __init__(self, file_name: str):
-        self.f = open(file_name, "r")
-        self.character_index = 0
-        self.line = 0
+        f = open(file_name, "r")
+        self.code = f.read()
+        self.index = 0
+        f.close()
         self.current_character = ''
 
     def get_next_character(self):
-        c = self.f.read(1)
-        if c == '\n':
-            self.line += 1
-        self.character_index = self.f.tell()
+        if len(self.code) <= self.index:
+            return ''
+        c = self.code[self.index]
+        self.index += 1
         self.current_character = c
         return c
 
     def revert_single_character(self):
-        if self.current_character == '\n':
-            self.line -= 1
-        self.character_index = self.character_index - 1
-        self.f.seek(self.character_index)
-
-    def revert(self, index: int):
-        self.character_index = self.character_index - index
-        self.f.seek(self.character_index)
+        self.index -= 1
 
 
 class ScannerResult:
@@ -97,6 +91,7 @@ class Token:
 def is_accepted_character(c):
     return c.isalnum() or c in SYMBOLS or c in WHITESPACE
 
+
 def get_next_token(reader: Reader, result: ScannerResult):
     state = State.START
     token = Token()
@@ -117,7 +112,7 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 state = State.NUM
                 token.type = TokenType.NUM
             elif c in SYMBOLS:
-                state = State.SYMBOL
+                state = State.SYMBOL if c == '=' or c == '*' else State.END  # symbols that need lookahead
                 token.type = TokenType.SYMBOL
             elif c == '/':
                 pass
@@ -148,10 +143,14 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 state = state.END
 
         elif state == State.SYMBOL:
-            if not token.content == '==':
+            if not token.content == '==' and is_accepted_character(c):
                 reader.revert_single_character()
                 token.content = token.content[:-1]
                 state = State.END
+            elif not is_accepted_character(c):
+                token.type = TokenType.ERROR
+                token.error = 'Invalid input'
+                state = state.END
 
         elif state == State.ONE_LINE_COMMENT:
             pass
