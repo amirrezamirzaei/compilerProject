@@ -6,6 +6,12 @@ SYMBOLS = [';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '=='
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 LINE = 1
 
+class TokenType(Enum):
+    NUM, ID, KEYWORD, SYMBOL, COMMENT, UNKNOWN, ERROR = range(7)
+
+
+class State(Enum):
+    START, NUM, ID, SYMBOL, ONE_LINE_COMMENT, MULTI_LINE_COMMENT, MULTI_LINE_COMMENT_END, UNDECIDED_COMMENT, END, ERROR = range(10)
 
 class Reader:
 
@@ -65,14 +71,6 @@ class ScannerResult:
         f.close()
 
 
-class TokenType(Enum):
-    NUM, ID, KEYWORD, SYMBOL, COMMENT, UNKNOWN, ERROR = range(7)
-
-
-class State(Enum):
-    START, NUM, ID, SYMBOL, ONE_LINE_COMMENT, MULTI_LINE_COMMENT, END, ERROR = range(8)
-
-
 class Token:
 
     def __init__(self):
@@ -93,17 +91,22 @@ def is_accepted_character(c):
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
+    global LINE
+
     state = State.START
     token = Token()
 
     while state != State.END:
         c = reader.get_next_character()
-        if c in WHITESPACE or c == '':
+        #print(c)
+        
+
+        if (c in WHITESPACE and token.type != TokenType.COMMENT) or c == '':
             state = State.END
             continue
 
         token.content += c
-
+        
         if state == State.START:
             if c.isalpha():
                 state = State.ID
@@ -115,11 +118,12 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 state = State.SYMBOL if c == '=' or c == '*' else State.END  # symbols that need lookahead
                 token.type = TokenType.SYMBOL
             elif c == '/':
-                pass
+                state = State.UNDECIDED_COMMENT
+                token.type = TokenType.COMMENT
             else:
                 token.type = TokenType.ERROR
                 token.error = 'Invalid input'
-                state = state.END
+                state = State.END
 
         elif state == State.NUM:
             if not c.isdigit():
@@ -136,11 +140,11 @@ def get_next_token(reader: Reader, result: ScannerResult):
             if not c.isalnum() and is_accepted_character(c):
                 reader.revert_single_character()
                 token.content = token.content[:-1]
-                state = state.END
+                state = State.END
             elif not is_accepted_character(c):
                 token.type = TokenType.ERROR
                 token.error = 'Invalid input'
-                state = state.END
+                state = State.END
 
         elif state == State.SYMBOL:
             if not token.content == '==' and is_accepted_character(c):
@@ -150,19 +154,41 @@ def get_next_token(reader: Reader, result: ScannerResult):
             elif not is_accepted_character(c):
                 token.type = TokenType.ERROR
                 token.error = 'Invalid input'
-                state = state.END
-
+                state = State.END
+        
+        elif state == State.UNDECIDED_COMMENT:
+            if c == '/':
+                state = State.ONE_LINE_COMMENT
+            elif c == '*':
+                state = State.MULTI_LINE_COMMENT
+            else:
+                token.type = TokenType.ERROR
+                token.error = 'Invalid input'
+                state = State.END
+            
+        
         elif state == State.ONE_LINE_COMMENT:
-            pass
-
+            if c == '\n':
+                LINE += 1
+                state = State.END
+                
         elif state == State.MULTI_LINE_COMMENT:
-            pass
+            if c == '*':
+                state = State.MULTI_LINE_COMMENT_END
+            elif c == '\n':
+                LINE += 1
+            
+        
+        elif state == State.MULTI_LINE_COMMENT_END:
+            if c == '/':
+                state = State.END
+            
 
     if token.type == TokenType.ID:
         if token.content in KEYWORDS:
             token.type = TokenType.KEYWORD
 
-    if token.type != TokenType.ERROR and token.type != TokenType.UNKNOWN:
+    if not token.type in [TokenType.ERROR, TokenType.UNKNOWN, TokenType.COMMENT]:
         result.add(result.tokens, token)
     elif token.type == TokenType.ERROR:
         result.add(result.lexical_errors, token)
@@ -170,8 +196,10 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if token.type == TokenType.ID and not result.symbol_table.__contains__(token.content):
         result.symbol_table.append(token.content)
 
+    if token.type == TokenType.COMMENT:
+        return get_next_token(reader,result)
+
     if c == '\n':
-        global LINE
         LINE += 1
 
     return c != ''
