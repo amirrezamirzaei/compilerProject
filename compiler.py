@@ -177,8 +177,7 @@ def get_next_token(reader: Reader, result: ScannerResult):
     return c != ''
 
 
-file_name = sys.argv[1]
-r = Reader(file_name)
+r = Reader('input.txt')
 out = ScannerResult()
 while get_next_token(r, out):
     pass
