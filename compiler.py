@@ -6,12 +6,15 @@ SYMBOLS = [';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '=='
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 LINE = 1
 
+
 class TokenType(Enum):
     NUM, ID, KEYWORD, SYMBOL, COMMENT, UNKNOWN, ERROR = range(7)
 
 
 class State(Enum):
-    START, NUM, ID, SYMBOL, ONE_LINE_COMMENT, MULTI_LINE_COMMENT, MULTI_LINE_COMMENT_END, UNDECIDED_COMMENT, END, ERROR = range(10)
+    START, NUM, ID, SYMBOL, ONE_LINE_COMMENT, MULTI_LINE_COMMENT, MULTI_LINE_COMMENT_END, UNDECIDED_COMMENT, END, ERROR = range(
+        10)
+
 
 class Reader:
 
@@ -83,7 +86,9 @@ class Token:
         if self.type != TokenType.ERROR:
             return f'({self.type.name}, {self.content})'
         else:
-            return f'({self.content}, {self.error})'
+            if self.error == 'Unclosed comment' and len(self.error) > 7:
+                return f'({self.content.strip()[0:7]}..., {self.error})'
+            return f'({self.content.strip()}, {self.error})'
 
 
 def is_accepted_character(c):
@@ -100,8 +105,10 @@ def get_next_token(reader: Reader, result: ScannerResult):
         c = reader.get_next_character()
         # print(c)
 
-
         if (c in WHITESPACE and token.type != TokenType.COMMENT) or c == '':
+            if token.type == TokenType.COMMENT and c == '' and state != State.ONE_LINE_COMMENT:
+                token.type = TokenType.ERROR
+                token.error = 'Unclosed comment'
             state = State.END
             continue
 
@@ -182,6 +189,8 @@ def get_next_token(reader: Reader, result: ScannerResult):
         elif state == State.MULTI_LINE_COMMENT_END:
             if c == '/':
                 state = State.END
+            else:
+                state = State.MULTI_LINE_COMMENT
 
     if token.type == TokenType.ID:
         if token.content in KEYWORDS:
@@ -195,7 +204,7 @@ def get_next_token(reader: Reader, result: ScannerResult):
         result.add(result.lexical_errors, token)
 
     if token.type == TokenType.ID and not result.symbol_table.__contains__(token.content):
-        result.symbol_table.append(token.caontent)
+        result.symbol_table.append(token.content)
 
     if token.type == TokenType.COMMENT:
         return get_next_token(reader, result)
