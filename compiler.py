@@ -189,7 +189,7 @@ def get_next_token(reader: Reader, result: ScannerResult):
         elif state == State.MULTI_LINE_COMMENT_END:
             if c == '/':
                 state = State.END
-            else:
+            elif c != '*':
                 state = State.MULTI_LINE_COMMENT
 
     if token.type == TokenType.ID:
