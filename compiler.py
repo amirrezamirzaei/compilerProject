@@ -134,7 +134,7 @@ def get_next_token(reader: Reader, result: ScannerResult):
 
         elif state == State.NUM:
             if not c.isdigit():
-                if c.isalpha():
+                if c.isalpha() or not is_accepted_character(c):
                     state = State.END
                     token.type = TokenType.ERROR
                     token.error = 'Invalid number'
@@ -171,6 +171,8 @@ def get_next_token(reader: Reader, result: ScannerResult):
             else:
                 token.type = TokenType.ERROR
                 token.error = 'Invalid input'
+                reader.revert_single_character()
+                token.content = token.content[:-1]
                 state = State.END
 
 
@@ -190,7 +192,10 @@ def get_next_token(reader: Reader, result: ScannerResult):
             if c == '/':
                 state = State.END
             elif c != '*':
+                if c == '\n':
+                    LINE += 1
                 state = State.MULTI_LINE_COMMENT
+
 
     if token.type == TokenType.ID:
         if token.content in KEYWORDS:
