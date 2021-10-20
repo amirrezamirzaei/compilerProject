@@ -1,0 +1,6 @@
+9.	(ID, d) 
+12.	(NUM, 123) 
+13.	(NUM, 123) 
+14.	(ID, aa) 
+15.	(ID, a) 
+17.	(ID, unopened) (ID, comment) 

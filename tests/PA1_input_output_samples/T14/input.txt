@@ -1,0 +1,3 @@
+test e commenti ke ba EOF baste shode bejaye newline
+
+// comment

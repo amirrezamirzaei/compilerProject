@@ -1,0 +1,25 @@
+// singlelinecomment
+/* multi
+          line
+             comment */
+
+vviod void if ( a =$ 255# ( ) ) ;
+    { this is a test } { asdfg }
+b = /* commentcommentcomment */ == * / 123qsw;
+c = #2;
+return;until;break;repeat;int;void;else;if;
+a =$ b
+c *@ d
+e == f
+g $ h
+i =* j
+k =) l
+m (= n
+o +$ p
+
+/* unclosed comment
+unclosed
+un
+cl
+os
+ed

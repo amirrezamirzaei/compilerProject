@@ -1,0 +1,1 @@
+1.	(ID, test) (ID, e) (ID, commenti) (ID, ke) (ID, ba) (ID, EOF) (ID, baste) (ID, shode) (ID, bejaye) (ID, newline) 

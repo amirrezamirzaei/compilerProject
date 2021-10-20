@@ -1,0 +1,5 @@
+9.	(12345d, Invalid number) 
+10.	(12345d, Invalid number) 
+11.	(1234@, Invalid number) 
+12.	(@, Invalid input) 
+17.	(*/, Unmatched comment) 

@@ -1,0 +1,17 @@
+// comment
+/* multi
+             line
+                   comment
+*/
+/* @#$%<>? */
+// @#$%<>?
+
+12345dd
+12345d
+1234@
+@123
+123
+aa
+a
+
+unopened comment */
