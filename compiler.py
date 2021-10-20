@@ -26,14 +26,20 @@ class Reader:
         self.current_character = ''
 
     def get_next_character(self):
+        global LINE
         if len(self.code) <= self.index:
             return ''
         c = self.code[self.index]
         self.index += 1
         self.current_character = c
+        if c == '\n':
+            LINE+=1
         return c
 
     def revert_single_character(self):
+        global LINE
+        if self.current_character == '\n':
+            LINE-=1
         self.index -= 1
 
 
@@ -178,22 +184,17 @@ def get_next_token(reader: Reader, result: ScannerResult):
 
         elif state == State.ONE_LINE_COMMENT:
             if c == '\n':
-                LINE += 1
                 state = State.END
 
         elif state == State.MULTI_LINE_COMMENT:
             if c == '*':
                 state = State.MULTI_LINE_COMMENT_END
-            elif c == '\n':
-                LINE += 1
 
 
         elif state == State.MULTI_LINE_COMMENT_END:
             if c == '/':
                 state = State.END
             elif c != '*':
-                if c == '\n':
-                    LINE += 1
                 state = State.MULTI_LINE_COMMENT
 
 
@@ -214,8 +215,6 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if token.type == TokenType.COMMENT:
         return get_next_token(reader, result)
 
-    if c == '\n':
-        LINE += 1
 
     return c != ''
 
