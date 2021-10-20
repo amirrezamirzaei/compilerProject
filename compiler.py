@@ -1,10 +1,8 @@
-import sys
 from enum import Enum
 
 KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
 SYMBOLS = [';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
-LINE = 1
 
 
 class TokenType(Enum):
@@ -24,22 +22,21 @@ class Reader:
         self.index = 0
         f.close()
         self.current_character = ''
+        self.line = 1
 
     def get_next_character(self):
-        global LINE
         if len(self.code) <= self.index:
             return ''
         c = self.code[self.index]
         self.index += 1
         self.current_character = c
         if c == '\n':
-            LINE+=1
+            self.line += 1
         return c
 
     def revert_single_character(self):
-        global LINE
         if self.current_character == '\n':
-            LINE-=1
+            self.line -= 1
         self.index -= 1
 
 
@@ -82,11 +79,11 @@ class ScannerResult:
 
 class Token:
 
-    def __init__(self):
+    def __init__(self, line):
         self.type = TokenType.UNKNOWN
         self.content = ''
         self.error = ''
-        self.line = LINE
+        self.line = line
 
     def __repr__(self):
         if self.type != TokenType.ERROR:
@@ -102,10 +99,9 @@ def is_accepted_character(c):
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
-    global LINE
 
     state = State.START
-    token = Token()
+    token = Token(reader.line)
 
     while state != State.END:
         c = reader.get_next_character()
