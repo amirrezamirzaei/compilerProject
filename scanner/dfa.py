@@ -99,8 +99,10 @@ def get_next_token(reader: Reader, result: ScannerResult):
             else:
                 token.type = TokenType.ERROR
                 token.error = 'Invalid input'
-                reader.revert_single_character()
-                token.content = token.content[:-1]
+                if is_accepted_character(c):  # if the character after / is an invalid character we should output it
+                    # as an error
+                    reader.revert_single_character()
+                    token.content = token.content[:-1]
                 state = State.END
 
 
