@@ -20,7 +20,7 @@ class Token:
 
 
 def is_accepted_character(c):
-    return c.isalnum() or c in SYMBOLS or c in WHITESPACE
+    return c.isalnum() or c in SYMBOLS or c in WHITESPACE or c == '/'
 
 
 def get_next_token(reader: Reader, result: ScannerResult):
@@ -31,9 +31,12 @@ def get_next_token(reader: Reader, result: ScannerResult):
         c = reader.get_next_character()
 
         if (c in WHITESPACE and token.type != TokenType.COMMENT) or c == '':
-            if token.type == TokenType.COMMENT and c == '' and state != State.ONE_LINE_COMMENT:
+            if (state == State.ONE_LINE_COMMENT or state == State.MULTI_LINE_COMMENT or state == State.MULTI_LINE_COMMENT_END) and c == '' and state != State.ONE_LINE_COMMENT:
                 token.type = TokenType.ERROR
                 token.error = 'Unclosed comment'
+            if state == State.UNDECIDED_COMMENT:
+                token.type = TokenType.ERROR
+                token.error = 'Invalid input'
             state = State.END
             continue
 
@@ -79,13 +82,13 @@ def get_next_token(reader: Reader, result: ScannerResult):
                 state = State.END
 
         elif state == State.SYMBOL:
-            if not token.content == '==' and is_accepted_character(c):
-                reader.revert_single_character()
-                token.content = token.content[:-1]
-                state = State.END
-            elif not is_accepted_character(c):
+            if token.content == '*/' or not is_accepted_character(c):
                 token.type = TokenType.ERROR
                 token.error = 'Invalid input'
+                state = State.END
+            elif not token.content == '==' and is_accepted_character(c):
+                reader.revert_single_character()
+                token.content = token.content[:-1]
                 state = State.END
 
         elif state == State.UNDECIDED_COMMENT:
