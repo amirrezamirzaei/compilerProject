@@ -31,7 +31,8 @@ def get_next_token(reader: Reader, result: ScannerResult):
         c = reader.get_next_character()
 
         if (c in WHITESPACE and token.type != TokenType.COMMENT) or c == '':
-            if (state == State.ONE_LINE_COMMENT or state == State.MULTI_LINE_COMMENT or state == State.MULTI_LINE_COMMENT_END) and c == '' and state != State.ONE_LINE_COMMENT:
+            if (
+                    state == State.ONE_LINE_COMMENT or state == State.MULTI_LINE_COMMENT or state == State.MULTI_LINE_COMMENT_END) and c == '' and state != State.ONE_LINE_COMMENT:
                 token.type = TokenType.ERROR
                 token.error = 'Unclosed comment'
             if state == State.UNDECIDED_COMMENT:
@@ -138,4 +139,8 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if token.type == TokenType.COMMENT:
         return get_next_token(reader, result)
 
-    return c != ''
+    if token.content == '':
+        token.content = '$'
+        token.type = TokenType.END
+
+    return token

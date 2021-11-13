@@ -6,7 +6,7 @@ WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 
 
 class TokenType(Enum):
-    NUM, ID, KEYWORD, SYMBOL, COMMENT, UNKNOWN, ERROR = range(7)
+    NUM, ID, KEYWORD, SYMBOL, COMMENT, UNKNOWN, ERROR, END = range(7)
 
 
 class State(Enum):

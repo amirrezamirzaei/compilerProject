@@ -107,7 +107,7 @@
 189.	(ID, while) (SYMBOL, () (ID, x) (SYMBOL, )) (SYMBOL, {) 
 190.	(ID, d) (SYMBOL, [) (ID, n) (SYMBOL, +) (SYMBOL, +) (SYMBOL, ]) (SYMBOL, =) (SYMBOL, () (KEYWORD, int) (SYMBOL, )) (SYMBOL, () (SYMBOL, )) (SYMBOL, ;) 
 191.	(KEYWORD, if) (SYMBOL, () (ID, n) (SYMBOL, =) (ID, DIGITS) (SYMBOL, )) (KEYWORD, break) (SYMBOL, ;) 
-192.	(ID, x) (SYMBOL, =) (SYMBOL, ;) 
+192.	(ID, x) (SYMBOL, =) (ID, x) (SYMBOL, ;) 
 193.	(SYMBOL, }) 
 197.	(ID, for) (SYMBOL, () (ID, i) (SYMBOL, =) (ID, n) (SYMBOL, -) (NUM, 1) (SYMBOL, ;) (SYMBOL, =) (NUM, 0) (SYMBOL, ;) (ID, i) (SYMBOL, -) (SYMBOL, -) (SYMBOL, )) (SYMBOL, {) 
 198.	(ID, topline) (SYMBOL, () (ID, d) (SYMBOL, [) (ID, i) (SYMBOL, ]) (SYMBOL, ,) (ID, buf) (SYMBOL, )) (SYMBOL, ;) 
