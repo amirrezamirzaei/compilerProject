@@ -19,7 +19,7 @@
     "Follow": [";","[","(",")",","]
   },
 
-  "Declaration_prime": {
+  "Declaration-prime": {
     "First": [";","[","("],
     "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
   },
@@ -44,7 +44,7 @@
     "Follow": [")"]
   },
 
-  "Param_list": {
+  "Param-list": {
     "First": [",","EPSILON"],
     "Follow": [")"]
   },
@@ -54,12 +54,12 @@
     "Follow": [")",","]
   },
 
-  "Param_prime": {
+  "Param-prime": {
     "First": ["[","EPSILON"],
     "Follow": [")",","]
   },
 
-  "Compound_stmt": {
+  "Compound-stmt": {
     "First": ["{"],
     "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","endif","else","repeat","until","return","$"]
   },
@@ -145,7 +145,7 @@
   },
 
   "Additive-expression-prime": {
-    "First": ["(","+","-","*"],
+    "First": ["(","+","-","*","EPSILON"],
     "Follow": [";","]",")",",","<","=="]
   },
 
@@ -184,7 +184,7 @@
     "Follow": [";","]",")",",","<","==","+","-"]
   },
 
-  "FACTOR": {
+  "Factor": {
     "First": ["ID","NUM","("],
     "Follow": [";","]",")",",","<","==","+","-","*"]
   },

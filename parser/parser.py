@@ -1,14 +1,14 @@
 import json
 
 from scanner import Reader, ScannerResult, get_next_token
-from anytree import Node, RenderTree
-from scanner.const import TokenType
+from anytree import Node
+
 
 
 def parse():
     t = TransitionDiagram(Reader('input.txt'), ScannerResult())
-    t.parse()
-
+    tree = t.parse()
+    return tree, 'There is no syntax error.'
 
 class TransitionDiagram:
 
@@ -20,15 +20,14 @@ class TransitionDiagram:
 
     def parse(self):
         tree = self.parse_Program()
-        for pre, fill, node in RenderTree(tree):
-            print("%s%s" % (pre, node.name))
+        return tree
 
     def parse_Program(self):
         root = Node("Program")
         token = self.get_terminal()
 
         # Program -> Declaration-list $
-        if token.get_terminal_form() in self.grammar['Declaration-list']['First']:
+        if self.is_in_first('Declaration-list', token):
             self.parse_Declaration_list(root)
             Node("$", parent=root)  # todo fix
         else:
@@ -40,7 +39,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Declaration-list -> Declaration Declaration-list
-        if token.get_terminal_form() in self.grammar['Declaration']['First']:
+        if self.is_in_first('Declaration', token):
             self.parse_Declaration(node)
             self.parse_Declaration_list(node)
         # Declaration-list -> EPSILON
@@ -54,7 +53,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Declaration -> Declaration-initial Declaration-prime
-        if token.get_terminal_form() in self.grammar['Declaration-initial']['First']:
+        if self.is_in_first('Declaration-initial', token):
             self.parse_Declaration_initial(node)
             self.parse_Declaration_prime(node)
         else:
@@ -65,7 +64,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Declaration-initial ->  Type-specifier ID
-        if token.get_terminal_form() in self.grammar['Type-specifier']['First']:
+        if self.is_in_first('Type-specifier', token):
             self.parse_Type_specifier(node)
             self.match_terminal('ID', node)
         else:
@@ -76,10 +75,10 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Declaration-prime -> Fun-declaration-prime
-        if token.get_terminal_form() in self.grammar['Fun-declaration-prime']['First']:
+        if self.is_in_first('Fun-declaration-prime', token):
             self.parse_Fun_declaration_prime(node)
         # Declaration-prime -> Var-declaration-prime
-        elif token.get_terminal_form() in self.grammar['Var-declaration-prime']['First']:
+        elif self.is_in_first('Var-declaration-prime', token):
             self.parse_Var_declaration_prime(node)
         else:
             pass
@@ -162,7 +161,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Param -> Declaration-initial Param-prime
-        if token.get_terminal_form() in self.grammar['Declaration-initial']['First']:
+        if self.is_in_first('Declaration-initial', token):
             self.parse_Declaration_initiale(node)
         else:
             pass
@@ -176,7 +175,7 @@ class TransitionDiagram:
             self.match_terminal('[', node)
             self.match_terminal(']', node)
         # Param-list -> EPSILON
-        elif token.get_terminal_form() in self.grammar['Param-Prime']['Follow']:
+        elif token.get_terminal_form() in self.grammar['Param-prime']['Follow']:
             Node("epsilon", parent=node)
         else:
             pass
@@ -199,7 +198,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Statement-list -> Statement Statement-list
-        if token.get_terminal_form() in self.grammar['Statement']['First']:
+        if self.is_in_first('Statement', token):
             self.parse_Statement(node)
             self.parse_Statement_list(node)
         # Statement-list -> EPSILON
@@ -213,19 +212,19 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Statement -> Expression-stmt
-        if token.get_terminal_form() in self.grammar['Expression-stmt']['First']:
+        if self.is_in_first('Expression-stmt', token):
             self.parse_Expression_stmt(node)
         # Statement -> Compound-stmt
-        elif token.get_terminal_form() in self.grammar['Compound-stmt']['First']:
+        elif self.is_in_first('Compound-stmt', token):
             self.parse_Compound_stmt(node)
         # Statement -> Selection-stmt
-        elif token.get_terminal_form() in self.grammar['Selection-stmt']['First']:
+        elif self.is_in_first('Selection-stmt', token):
             self.parse_Selection_stmt(node)
         # Statement -> Iteration-stmt
-        elif token.get_terminal_form() in self.grammar['Iteration-stmt']['First']:
-            self.parse_Iteration_stmtt(node)
+        elif self.is_in_first('Iteration-stmt', token):
+            self.parse_Iteration_stmt(node)
         # Statement -> Return-stmt
-        elif token.get_terminal_form() in self.grammar['Return-stmt']['First']:
+        elif self.is_in_first('Return-stmt', token):
             self.parse_Return_stmt(node)
         else:
             pass
@@ -235,7 +234,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Expression-stmt -> Expression ;
-        if token.get_terminal_form() in self.grammar['Expression']['First']:
+        if self.is_in_first('Expression', token):
             self.parse_Expression(node)
             self.match_terminal(';', node)
         # Expression-stmt -> break ;
@@ -269,12 +268,12 @@ class TransitionDiagram:
 
         # Else-stmt -> endif
         if token.get_terminal_form() == 'endif':
-            self.match_terminal('endif')
+            self.match_terminal('endif', node)
         #  Else-stmt -> else Statement endif
         elif token.get_terminal_form() == 'else':
-            self.match_terminal('else')
+            self.match_terminal('else', node)
             self.parse_Statement(node)
-            self.match_terminal('endif')
+            self.match_terminal('endif', node)
         else:
             pass
 
@@ -284,12 +283,12 @@ class TransitionDiagram:
 
         # Iteration-stmt -> repeat Statement until ( Expression )
         if token.get_terminal_form() == 'repeat':
-            self.match_terminal('repeat')
+            self.match_terminal('repeat', node)
             self.parse_Statement(node)
-            self.match_terminal('until')
-            self.match_terminal('(')
+            self.match_terminal('until', node)
+            self.match_terminal('(', node)
             self.parse_Expression(node)
-            self.match_terminal(')')
+            self.match_terminal(')', node)
         else:
             pass
 
@@ -299,7 +298,7 @@ class TransitionDiagram:
 
         # Return-stmt -> return Return-stmt-prime
         if token.get_terminal_form() == 'return':
-            self.match_terminal('return')
+            self.match_terminal('return', node)
             self.parse_Return_stmt_prime(node)
         else:
             pass
@@ -312,7 +311,7 @@ class TransitionDiagram:
         if token.get_terminal_form() == ';':
             self.match_terminal(';', node)
         # Return-stmt-prime -> Expression ;
-        elif token.get_terminal_form() in self.grammar['Expression']['First']:
+        elif self.is_in_first('Expression', token):
             self.parse_Expression(node)
             self.match_terminal(';', node)
         else:
@@ -323,7 +322,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Expression -> Simple-expression-zegond | ID B
-        if token.get_terminal_form() in self.grammar['Simple-expression-zegond']['First']:
+        if self.is_in_first('Simple-expression-zegond', token):
             self.parse_Simple_expression_zegond(node)
         # Expression -> ID B
         elif token.get_terminal_form() == 'ID':
@@ -347,7 +346,7 @@ class TransitionDiagram:
             self.match_terminal(']')
             self.parse_H(node)
         # B -> Simple-expression-prime
-        elif token.get_terminal_form() in self.grammar['Simple-expression-prime']['First']:
+        elif self.is_in_first('Simple-expression-prime', token):
             self.parse_Simple_expression_prime(node)
         else:
             pass
@@ -361,7 +360,7 @@ class TransitionDiagram:
             self.match_terminal('=', node)
             self.parse_Expression(node)
         # H -> G D C
-        elif token.get_terminal_form() in self.grammar['G']['First']:
+        elif self.is_in_first('G', token):
             self.parse_G(node)
             self.parse_D(node)
             self.parse_C(node)
@@ -373,7 +372,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Simple-expression-zegond -> Additive-expression-zegond C
-        if token.get_terminal_form() in self.grammar['Additive-expression-zegond']['First']:
+        if self.is_in_first('Additive-expression-zegond', token):
             self.parse_Additive_expression_zegond(node)
             self.parse_C(node)
         else:
@@ -384,7 +383,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Simple-expression-prime -> Additive-expression-prime C
-        if token.get_terminal_form() in self.grammar['Additive-expression-prime']['First']:
+        if self.is_in_first('Additive-expression-prime', token):
             self.parse_Additive_expression_prime(node)
             self.parse_C(node)
         else:
@@ -395,7 +394,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # C -> Relop Additive-expression
-        if token.get_terminal_form() in self.grammar['Relop']['First']:
+        if self.is_in_first('Relop', token):
             self.parse_Relop(node)
             self.parse_Additive_expression(node)
         # C -> EPSILON
@@ -422,7 +421,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Additive-expression -> Term D
-        if token.get_terminal_form() in self.grammar['Term']['First']:
+        if self.is_in_first('Term', token):
             self.parse_Term(node)
             self.parse_D(node)
         else:
@@ -434,7 +433,7 @@ class TransitionDiagram:
 
         # Additive-expression-prime -> Term-prime D
 
-        if token.get_terminal_form() in self.grammar['Term-prime']['First']:
+        if self.is_in_first('Term-prime', token):
             self.parse_Term_prime(node)
             self.parse_D(node)
         else:
@@ -445,7 +444,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Additive-expression-zegond -> Term-zegond D
-        if token.get_terminal_form() in self.grammar['Term-zegond']['First']:
+        if self.is_in_first('Term-zegond', token):
             self.parse_Term_zegond(node)
             self.parse_D(node)
         else:
@@ -456,7 +455,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # D -> Addop Term D
-        if token.get_terminal_form() in self.grammar['Addop']['First']:
+        if self.is_in_first('Addop', token):
             self.parse_Addop(node)
             self.parse_Term(node)
             self.parse_D(node)
@@ -484,10 +483,9 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Term -> Factor G
-        if token.get_terminal_form() in self.grammar['Factor']['First']:
+        if self.is_in_first('Factor', token):
             self.parse_Factor(node)
             self.parse_G(node)
-            self.parse_D(node)
         else:
             pass
 
@@ -496,7 +494,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Term-prime -> Factor-prime G
-        if token.get_terminal_form() in self.grammar['Factor-prime']['First']:
+        if self.is_in_first('Factor-prime', token):
             self.parse_Factor_prime(node)
             self.parse_G(node)
         else:
@@ -507,7 +505,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Term-zegond -> Factor-zegond G
-        if token.get_terminal_form() in self.grammar['Factor-zegond']['First']:
+        if self.is_in_first('Factor-zegond', token):
             self.parse_Factor_zegond(node)
             self.parse_G(node)
         else:
@@ -539,11 +537,11 @@ class TransitionDiagram:
             self.match_terminal(')', node)
         # Factor -> ID Var-call-prime
         elif token.get_terminal_form() == 'ID':
-            self.match_terminal('ID')
+            self.match_terminal('ID', node)
             self.parse_Var_call_prime(node)
         # Factor -> NUM
         elif token.get_terminal_form() == 'NUM':
-            self.match_terminal('NUM')
+            self.match_terminal('NUM', node)
         else:
             pass
 
@@ -557,7 +555,7 @@ class TransitionDiagram:
             self.parse_Args(node)
             self.match_terminal(')', node)
         # Var-call-prime -> Var-prime
-        elif token.get_terminal_form() in self.grammar['Var-prime']['First']:
+        elif self.is_in_first('Var-prime', token):
             self.parse_Var_prime(node)
         else:
             pass
@@ -612,7 +610,7 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Args -> Arg-list
-        if token.get_terminal_form() in self.grammar['Arg-list']['First']:
+        if self.is_in_first('Arg-list', token):
             self.parse_Arg_list(node)
         # Args -> EPSILON
         elif token.get_terminal_form() in self.grammar['Args']['Follow']:
@@ -625,9 +623,9 @@ class TransitionDiagram:
         token = self.get_terminal()
 
         # Arg-list -> Expression Arg-list-prime
-        if token.get_terminal_form() in self.grammar['Expression']['First']:
+        if self.is_in_first('Expression', token):
             self.parse_Expression(node)
-            self.parse_Arg_list_prime()
+            self.parse_Arg_list_prime(node)
         else:
             pass
 
@@ -661,5 +659,10 @@ class TransitionDiagram:
         if self.current_token.get_terminal_form() == terminal:
             Node(self.current_token, parent=node)
         else:
+            print(self.current_token)
             print(f'WTTTTTTTF {self.current_token.get_terminal_form()} {terminal}')
         self.current_token = None
+
+    
+    def is_in_first(self, non_terminal, token):
+        return token.get_terminal_form() in self.grammar[non_terminal]['First'] or ('EPSILON' in self.grammar[non_terminal]['First'])

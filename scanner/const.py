@@ -1,6 +1,6 @@
 from enum import Enum
 
-KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']
+KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'endif']
 SYMBOLS = [';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '*', '=', '==', '<']
 WHITESPACE = [' ', '\n', '\r', '\t', '\v', '\f']
 
