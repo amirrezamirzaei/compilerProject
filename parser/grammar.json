@@ -14,7 +14,7 @@
     "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
   },
 
-  "Declaration_initial": {
+  "Declaration-initial": {
     "First": ["int","void"],
     "Follow": [";","[","(",")",","]
   },
@@ -71,7 +71,7 @@
 
   "Statement": {
     "First": ["ID",";","NUM","(","{","break","if","repeat","return"],
-    "Follow": ["ID",";","NUM","(",,"{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
   },
 
   "Expression-stmt": {

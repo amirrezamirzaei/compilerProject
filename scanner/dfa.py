@@ -21,7 +21,7 @@ class Token:
                 return f'({self.content.strip()[0:7]}..., {self.error})'
             return f'({self.content.strip()}, {self.error})'
 
-    def get_terminal(self):
+    def get_terminal_form(self):
         """
         this function will return the grammar notation of a token content
         """
@@ -151,8 +151,10 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if token.type == TokenType.COMMENT:
         return get_next_token(reader, result)
 
-    if token.content == '':
+    if c == '':
         token.content = '$'
         token.type = TokenType.END
+    elif token.type == TokenType.UNKNOWN:  # current token is new line
+        return get_next_token(reader, result)
 
     return token
