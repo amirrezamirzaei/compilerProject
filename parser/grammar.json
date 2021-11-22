@@ -64,7 +64,7 @@
     "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","endif","else","repeat","until","return","$"]
   },
 
-  "Statement_list": {
+  "Statement-list": {
     "First": ["ID",";","NUM","(","{","break","if","repeat","return","EPSILON"],
     "Follow": ["}"]
   },
@@ -125,7 +125,7 @@
   },
 
   "Simple-expression-prime": {
-    "First": ["("],
+    "First": ["(","<","==","+","-","*","EPSILON"],
     "Follow": [";","]",")",","]
   },
 
@@ -174,7 +174,7 @@
     "Follow": [";","]",")",",","<","==","+","-"]
   },
 
-  "Term-Zegond": {
+  "Term-zegond": {
     "First": ["NUM","("],
     "Follow": [";","]",")",",","<","==","+","-"]
   },
