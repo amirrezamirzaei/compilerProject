@@ -11,12 +11,24 @@ class Token:
         self.line = line
 
     def __repr__(self):
+        """
+        this function will the lexeme notation of  a token
+        """
         if self.type != TokenType.ERROR:
             return f'({self.type.name}, {self.content})'
         else:
             if self.error == 'Unclosed comment' and len(self.error) > 7:
                 return f'({self.content.strip()[0:7]}..., {self.error})'
             return f'({self.content.strip()}, {self.error})'
+
+    def get_terminal(self):
+        """
+        this function will return the grammar notation of a token content
+        """
+        if self.type == TokenType.ID or self.type == TokenType.NUM:
+            return self.type.name
+        else:
+            return self.content
 
 
 def is_accepted_character(c):

@@ -1,0 +1,226 @@
+{
+  "Program": {
+    "First": ["int","void","EPSILON"],
+    "Follow": ["$"]
+  },
+
+  "Declaration-list": {
+    "First": ["int","void","EPSILON"],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","repeat","return","$"]
+  },
+
+  "Declaration": {
+    "First": ["int","void"],
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+  },
+
+  "Declaration_initial": {
+    "First": ["int","void"],
+    "Follow": [";","[","(",")",","]
+  },
+
+  "Declaration_prime": {
+    "First": [";","[","("],
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+  },
+
+  "Var-declaration-prime": {
+    "First": [";","["],
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+  },
+
+  "Fun-declaration-prime": {
+    "First": ["("],
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+  },
+
+  "Type-specifier": {
+    "First": ["int","void"],
+    "Follow": ["ID"]
+  },
+
+  "Params": {
+    "First": ["int","void"],
+    "Follow": [")"]
+  },
+
+  "Param_list": {
+    "First": [",","EPSILON"],
+    "Follow": [")"]
+  },
+
+  "Param": {
+    "First": ["int","void"],
+    "Follow": [")",","]
+  },
+
+  "Param_prime": {
+    "First": ["[","EPSILON"],
+    "Follow": [")",","]
+  },
+
+  "Compound_stmt": {
+    "First": ["{"],
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","endif","else","repeat","until","return","$"]
+  },
+
+  "Statement_list": {
+    "First": ["ID",";","NUM","(","{","break","if","repeat","return","EPSILON"],
+    "Follow": ["}"]
+  },
+
+  "Statement": {
+    "First": ["ID",";","NUM","(","{","break","if","repeat","return"],
+    "Follow": ["ID",";","NUM","(",,"{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Expression-stmt": {
+    "First": ["ID",";","NUM","(","break"],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Selection-stmt": {
+    "First": ["if"],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Else-stmt": {
+    "First": ["endif","else"],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Iteration-stmt": {
+    "First": ["repeat"],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Return-stmt": {
+    "First": ["return"],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Return-stmt-prime": {
+    "First": ["ID",";","NUM","("],
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+  },
+
+  "Expression": {
+    "First": ["ID","NUM","("],
+    "Follow": [";","]",")",","]
+  },
+
+  "B": {
+    "First": ["[","(","=","<","==","+","-","*","EPSILON"],
+    "Follow": [";","]",")",","]
+  },
+
+  "H": {
+    "First": ["=","<","==","+","-","*","EPSILON"],
+    "Follow": [";","]",")",","]
+  },
+
+  "Simple-expression-zegond": {
+    "First": ["NUM","("],
+    "Follow": [";","]",")",","]
+  },
+
+  "Simple-expression-prime": {
+    "First": ["("],
+    "Follow": [";","]",")",","]
+  },
+
+  "C": {
+    "First": ["<","==","EPSILON"],
+    "Follow": [";","]",")",","]
+  },
+
+  "Relop": {
+    "First": ["<","=="],
+    "Follow": ["ID","NUM","("]
+  },
+
+  "Additive-expression": {
+    "First": ["ID","NUM","("],
+    "Follow": [";","]",")",","]
+  },
+
+  "Additive-expression-prime": {
+    "First": ["(","+","-","*"],
+    "Follow": [";","]",")",",","<","=="]
+  },
+
+  "Additive-expression-zegond": {
+    "First": ["NUM","("],
+    "Follow": [";","]",")",",","<","=="]
+  },
+
+  "D": {
+    "First": ["+","-","EPSILON"],
+    "Follow": [";","]",")",",","<","=="]
+  },
+
+  "Addop": {
+    "First": ["+","-"],
+    "Follow": ["ID","NUM","("]
+  },
+
+  "Term": {
+    "First": ["ID","NUM","("],
+    "Follow": [";","]",")",",","<","==","+","-"]
+  },
+
+  "Term-prime": {
+    "First": ["(","*","EPSILON"],
+    "Follow": [";","]",")",",","<","==","+","-"]
+  },
+
+  "Term-Zegond": {
+    "First": ["NUM","("],
+    "Follow": [";","]",")",",","<","==","+","-"]
+  },
+
+  "G": {
+    "First": ["*","EPSILON"],
+    "Follow": [";","]",")",",","<","==","+","-"]
+  },
+
+  "FACTOR": {
+    "First": ["ID","NUM","("],
+    "Follow": [";","]",")",",","<","==","+","-","*"]
+  },
+
+  "Var-call-prime": {
+    "First": ["[","(","EPSILON"],
+    "Follow": [";","]",")",",","<","==","+","-","*"]
+  },
+
+  "Var-prime": {
+    "First": ["[","EPSILON"],
+    "Follow": [";","]",")",",","<","==","+","-","*"]
+  },
+
+  "Factor-prime": {
+    "First": ["(","EPSILON"],
+    "Follow": [";","]",")",",","<","==","+","-","*"]
+  },
+
+  "Factor-zegond": {
+    "First": ["NUM","("],
+    "Follow": [";","]",")",",","<","==","+","-","*"]
+  },
+
+  "Args": {
+    "First": ["ID","NUM","(","EPSILON"],
+    "Follow": [")"]
+  },
+
+  "Arg-list": {
+    "First": ["ID","NUM","("],
+    "Follow": [")"]
+  },
+
+  "Arg-list-prime": {
+    "First": [",","EPSILON"],
+    "Follow": [")"]
+  }
+}
