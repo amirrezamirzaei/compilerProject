@@ -10,6 +10,7 @@ for dir in test_parser/*; do
     printf "\n\n=====================================>>>>> Running Test ${dir}...\n" >> brief_results.txt
     printf "\n\n              *** parse_tree.txt diffrences ***\n" >> log.txt
     diff -s -y -B -W 250 -w parse_tree.txt "${dir}/parse_tree.txt" >> log.txt
+    diff -y -B -W 250 -w -q parse_tree.txt "${dir}/parse_tree.txt" >> brief_results.txt
     printf "\n\n              *** syntax_errors.txt diffrences ***\n" >> log.txt
     diff -s -y -B -W 250 -w syntax_errors.txt "${dir}/syntax_errors.txt" >> log.txt
     diff -y -B -W 250 -w -q syntax_errors.txt "${dir}/syntax_errors.txt" >> brief_results.txt

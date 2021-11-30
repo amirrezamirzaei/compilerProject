@@ -35,7 +35,7 @@ class TransitionDiagram:
             if self.parsing_EOF:
                 Node("$", parent=root)
         else:  # error
-            root.parent = None
+            root = Node("Program")
             if not self.handle_error_non_terminal('Program', token):
                 self.parse_Program(root)
         return root
@@ -54,9 +54,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Declaration']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Declaration_list', token):
-                self.parse_Declaration_list(node)
+                self.parse_Declaration_list(parent)
 
     def parse_Declaration(self, node):
         if not self.parsing_EOF:
@@ -69,9 +70,10 @@ class TransitionDiagram:
             self.parse_Declaration_initial(node)
             self.parse_Declaration_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Declaration', token):
-                self.parse_Declaration(node)
+                self.parse_Declaration(parent)
 
     def parse_Declaration_initial(self, node):
         if not self.parsing_EOF:
@@ -84,9 +86,10 @@ class TransitionDiagram:
             self.parse_Type_specifier(node)
             self.match_terminal('ID', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Declaration-initial', token):
-                self.parse_Declaration_initial(node)
+                self.parse_Declaration_initial(parent)
 
     def parse_Declaration_prime(self, node):
         if not self.parsing_EOF:
@@ -101,9 +104,10 @@ class TransitionDiagram:
         elif self.is_in_first('Var-declaration-prime', token):
             self.parse_Var_declaration_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Declaration-prime', token):
-                self.parse_Declaration_prime(node)
+                self.parse_Declaration_prime(parent)
 
     def parse_Var_declaration_prime(self, node):
         if not self.parsing_EOF:
@@ -121,9 +125,10 @@ class TransitionDiagram:
             self.match_terminal(']', node)
             self.match_terminal(';', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Var-declaration-prime', token):
-                self.parse_Var_declaration_prime(node)
+                self.parse_Var_declaration_prime(parent)
 
     def parse_Fun_declaration_prime(self, node):
         if not self.parsing_EOF:
@@ -138,9 +143,10 @@ class TransitionDiagram:
             self.match_terminal(')', node)
             self.parse_Compound_stmt(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Fun-declaration-prime', token):
-                self.parse_Fun_declaration_prime(node)
+                self.parse_Fun_declaration_prime(parent)
 
     def parse_Type_specifier(self, node):
         if not self.parsing_EOF:
@@ -155,9 +161,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == 'void':
             self.match_terminal('void', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Type-specifier', token):
-                self.parse_Type_specifier(node)
+                self.parse_Type_specifier(parent)
 
     def parse_Params(self, node):
         if not self.parsing_EOF:
@@ -175,9 +182,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == 'void':
             self.match_terminal('void', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Params', token):
-                self.parse_Params(node)
+                self.parse_Params(parent)
 
     def parse_Param_list(self, node):
         if not self.parsing_EOF:
@@ -194,9 +202,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Param-list']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Param-list', token):
-                self.parse_Param_list(node)
+                self.parse_Param_list(parent)
 
     def parse_Param(self, node):
         if not self.parsing_EOF:
@@ -209,9 +218,10 @@ class TransitionDiagram:
             self.parse_Declaration_initial(node)
             self.parse_Param_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Param', token):
-                self.parse_Param(node)
+                self.parse_Param(parent)
 
     def parse_Param_prime(self, node):
         if not self.parsing_EOF:
@@ -227,9 +237,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Param-prime']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Param-prime', token):
-                self.parse_Param_prime(node)
+                self.parse_Param_prime(parent)
 
     def parse_Compound_stmt(self, node):
         if not self.parsing_EOF:
@@ -244,9 +255,10 @@ class TransitionDiagram:
             self.parse_Statement_list(node)
             self.match_terminal('}', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Compound-stmt', token):
-                self.parse_Compound_stmt(node)
+                self.parse_Compound_stmt(parent)
 
     def parse_Statement_list(self, node):
         if not self.parsing_EOF:
@@ -262,9 +274,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Statement-list']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Statement-list', token):
-                self.parse_Statement_list(node)
+                self.parse_Statement_list(parent)
 
     def parse_Statement(self, node):
         if not self.parsing_EOF:
@@ -288,9 +301,10 @@ class TransitionDiagram:
         elif self.is_in_first('Return-stmt', token):
             self.parse_Return_stmt(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Statement', token):
-                self.parse_Statement(node)
+                self.parse_Statement(parent)
 
     def parse_Expression_stmt(self, node):
         if not self.parsing_EOF:
@@ -310,9 +324,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == ';':
             self.match_terminal(';', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Expression-stmt', token):
-                self.parse_Expression_stmt(node)
+                self.parse_Expression_stmt(parent)
 
     def parse_Selection_stmt(self, node):
         if not self.parsing_EOF:
@@ -329,9 +344,10 @@ class TransitionDiagram:
             self.parse_Statement(node)
             self.parse_Else_stmt(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Selection-stmt', token):
-                self.parse_Selection_stmt(node)
+                self.parse_Selection_stmt(parent)
 
     def parse_Else_stmt(self, node):
         if not self.parsing_EOF:
@@ -348,9 +364,10 @@ class TransitionDiagram:
             self.parse_Statement(node)
             self.match_terminal('endif', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Else-stmt', token):
-                self.parse_Else_stmt(node)
+                self.parse_Else_stmt(parent)
 
     def parse_Iteration_stmt(self, node):
         if not self.parsing_EOF:
@@ -367,9 +384,10 @@ class TransitionDiagram:
             self.parse_Expression(node)
             self.match_terminal(')', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Iteration-stmt', token):
-                self.parse_Iteration_stmt(node)
+                self.parse_Iteration_stmt(parent)
 
     def parse_Return_stmt(self, node):
         if not self.parsing_EOF:
@@ -382,9 +400,10 @@ class TransitionDiagram:
             self.match_terminal('return', node)
             self.parse_Return_stmt_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Return-stmt', token):
-                self.parse_Return_stmt(node)
+                self.parse_Return_stmt(parent)
 
     def parse_Return_stmt_prime(self, node):
         if not self.parsing_EOF:
@@ -400,9 +419,10 @@ class TransitionDiagram:
             self.parse_Expression(node)
             self.match_terminal(';', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Return-stmt-prime', token):
-                self.parse_Return_stmt_prime(node)
+                self.parse_Return_stmt_prime(parent)
 
     def parse_Expression(self, node):
         if not self.parsing_EOF:
@@ -418,9 +438,10 @@ class TransitionDiagram:
             self.match_terminal('ID', node)
             self.parse_B(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Expression', token):
-                self.parse_Expression(node)
+                self.parse_Expression(parent)
 
     def parse_B(self, node):
         if not self.parsing_EOF:
@@ -442,9 +463,10 @@ class TransitionDiagram:
         elif self.is_in_first('Simple-expression-prime', token):
             self.parse_Simple_expression_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('B', token):
-                self.parse_B(node)
+                self.parse_B(parent)
 
     def parse_H(self, node):
         if not self.parsing_EOF:
@@ -462,9 +484,10 @@ class TransitionDiagram:
             self.parse_D(node)
             self.parse_C(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('H', token):
-                self.parse_H(node)
+                self.parse_H(parent)
 
     def parse_Simple_expression_zegond(self, node):
         if not self.parsing_EOF:
@@ -477,9 +500,10 @@ class TransitionDiagram:
             self.parse_Additive_expression_zegond(node)
             self.parse_C(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Simple-expression-zegond', token):
-                self.parse_Simple_expression_zegond(node)
+                self.parse_Simple_expression_zegond(parent)
 
     def parse_Simple_expression_prime(self, node):
         if not self.parsing_EOF:
@@ -492,9 +516,10 @@ class TransitionDiagram:
             self.parse_Additive_expression_prime(node)
             self.parse_C(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Simple-expression-prime', token):
-                self.parse_Simple_expression_prime(node)
+                self.parse_Simple_expression_prime(parent)
 
     def parse_C(self, node):
         if not self.parsing_EOF:
@@ -510,9 +535,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['C']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('C', token):
-                self.parse_C(node)
+                self.parse_C(parent)
 
     def parse_Relop(self, node):
         if not self.parsing_EOF:
@@ -527,9 +553,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == '==':
             self.match_terminal('==', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Relop', token):
-                self.parse_Relop(node)
+                self.parse_Relop(parent)
 
     def parse_Additive_expression(self, node):
         if not self.parsing_EOF:
@@ -542,10 +569,10 @@ class TransitionDiagram:
             self.parse_Term(node)
             self.parse_D(node)
         else:  # errors
-            node.parent = None
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Additive-expression', token):
-                self.parse_Additive_expression(node)
+                self.parse_Additive_expression(parent)
 
     def parse_Additive_expression_prime(self, node):
         if not self.parsing_EOF:
@@ -558,9 +585,10 @@ class TransitionDiagram:
             self.parse_Term_prime(node)
             self.parse_D(node)
         else:  # errors
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Additive-expression-prime', token):
-                self.parse_Additive_expression_prime(node)
+                self.parse_Additive_expression_prime(parent)
 
     def parse_Additive_expression_zegond(self, node):
         if not self.parsing_EOF:
@@ -573,9 +601,10 @@ class TransitionDiagram:
             self.parse_Term_zegond(node)
             self.parse_D(node)
         else:  # prime
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Additive-expression-zegond', token):
-                self.parse_Additive_expression_zegond(node)
+                self.parse_Additive_expression_zegond(parent)
 
     def parse_D(self, node):
         if not self.parsing_EOF:
@@ -592,9 +621,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['D']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('D', token):
-                self.parse_D(node)
+                self.parse_D(parent)
 
     def parse_Addop(self, node):
         if not self.parsing_EOF:
@@ -609,9 +639,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == '-':
             self.match_terminal('-', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Addop', token):
-                self.parse_Addop(node)
+                self.parse_Addop(parent)
 
     def parse_Term(self, node):
         if not self.parsing_EOF:
@@ -624,9 +655,10 @@ class TransitionDiagram:
             self.parse_Factor(node)
             self.parse_G(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Term', token):
-                self.parse_Term(node)
+                self.parse_Term(parent)
 
     def parse_Term_prime(self, node):
         if not self.parsing_EOF:
@@ -639,9 +671,10 @@ class TransitionDiagram:
             self.parse_Factor_prime(node)
             self.parse_G(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Term-prime', token):
-                self.parse_Term_prime(node)
+                self.parse_Term_prime(parent)
 
     def parse_Term_zegond(self, node):
         if not self.parsing_EOF:
@@ -654,9 +687,10 @@ class TransitionDiagram:
             self.parse_Factor_zegond(node)
             self.parse_G(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Term-zegond', token):
-                self.parse_Term_zegond(node)
+                self.parse_Term_zegond(parent)
 
     def parse_G(self, node):
         if not self.parsing_EOF:
@@ -673,9 +707,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['G']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('G', token):
-                self.parse_G(node)
+                self.parse_G(parent)
 
     def parse_Factor(self, node):
         if not self.parsing_EOF:
@@ -696,9 +731,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == 'NUM':
             self.match_terminal('NUM', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Factor', token):
-                self.parse_Factor(node)
+                self.parse_Factor(parent)
 
     def parse_Var_call_prime(self, node):
         if not self.parsing_EOF:
@@ -715,9 +751,10 @@ class TransitionDiagram:
         elif self.is_in_first('Var-prime', token):
             self.parse_Var_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Var-call-prime', token):
-                self.parse_Var_call_prime(node)
+                self.parse_Var_call_prime(parent)
 
     def parse_Var_prime(self, node):
         if not self.parsing_EOF:
@@ -734,9 +771,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Var-prime']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Var-prime', token):
-                self.parse_Var_prime(node)
+                self.parse_Var_prime(parent)
 
     def parse_Factor_prime(self, node):
         if not self.parsing_EOF:
@@ -753,9 +791,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Factor-prime']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Factor-prime', token):
-                self.parse_Factor_prime(node)
+                self.parse_Factor_prime(parent)
 
     def parse_Factor_zegond(self, node):
         if not self.parsing_EOF:
@@ -772,9 +811,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() == 'NUM':
             self.match_terminal('NUM', node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Factor-zegond', token):
-                self.parse_Factor_zegond(node)
+                self.parse_Factor_zegond(parent)
 
     def parse_Args(self, node):
         if not self.parsing_EOF:
@@ -789,9 +829,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Args']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Args', token):
-                self.parse_Args(node)
+                self.parse_Args(parent)
 
     def parse_Arg_list(self, node):
         if not self.parsing_EOF:
@@ -804,9 +845,10 @@ class TransitionDiagram:
             self.parse_Expression(node)
             self.parse_Arg_list_prime(node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Arg-list', token):
-                self.parse_Arg_list(node)
+                self.parse_Arg_list(parent)
 
     def parse_Arg_list_prime(self, node):
         if not self.parsing_EOF:
@@ -823,9 +865,10 @@ class TransitionDiagram:
         elif token.get_terminal_form() in self.grammar['Arg-list-prime']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
+            parent = node.parent
             node.parent = None
             if not self.handle_error_non_terminal('Arg-list-prime', token):
-                self.parse_Arg_list_prime(node)
+                self.parse_Arg_list_prime(parent)
 
     def get_next_parse_token(self):
         self.current_token = get_next_token(self.reader, self.out)
