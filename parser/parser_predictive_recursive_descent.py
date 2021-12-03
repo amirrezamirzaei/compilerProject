@@ -4,13 +4,13 @@ from anytree import Node
 from scanner.const import TokenType
 
 
-def parse():
-    t = TransitionDiagram(Reader('input.txt'), ScannerResult())
+def parse_predictive_recursive_descent():
+    t = PredictiveRecursiveDescent(Reader('input.txt'), ScannerResult())
     tree, errors = t.parse()
     return tree, errors
 
 
-class TransitionDiagram:
+class PredictiveRecursiveDescent:
 
     def __init__(self, reader, out):
         self.reader = reader

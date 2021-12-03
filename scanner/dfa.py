@@ -14,7 +14,9 @@ class Token:
         """
         this function will the lexeme notation of  a token
         """
-        if self.type != TokenType.ERROR:
+        if self.type == TokenType.END:
+            return '$'
+        elif self.type != TokenType.ERROR:
             return f'({self.type.name}, {self.content})'
         else:
             if self.error == 'Unclosed comment' and len(self.error) > 7:

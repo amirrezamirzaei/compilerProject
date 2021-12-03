@@ -1,5 +1,5 @@
-from parser import parse
 from anytree import RenderTree
+from parser.parser_transition_diagram import parse_transition_diagram
 
 
 def write_to_file(tree, errors):
@@ -20,5 +20,5 @@ def write_to_file(tree, errors):
     f.close()
 
 
-tree, errors = parse()
+tree, errors = parse_transition_diagram()
 write_to_file(tree, errors)
