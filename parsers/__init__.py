@@ -1,0 +1,1 @@
+from parsers.parser_transition_diagram import TransitionDiagram

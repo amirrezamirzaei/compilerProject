@@ -16,7 +16,7 @@ class TransitionDiagram:
         self.reader = reader
         self.out = out
         self.current_token = None
-        self.grammar = json.load(open('parser/grammar.json'))
+        self.grammar = json.load(open('parsers/grammar.json'))
         self.errors = []
         self.parsing_EOF = False  # will be set to True when unexpected EOF occurs
         self.parsing_stack = []

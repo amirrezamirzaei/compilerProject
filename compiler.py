@@ -1,5 +1,5 @@
 from anytree import RenderTree
-from parser.parser_transition_diagram import parse_transition_diagram
+from parsers.parser_transition_diagram import parse_transition_diagram
 
 
 def write_to_file(tree, errors):
@@ -7,7 +7,7 @@ def write_to_file(tree, errors):
     for pre, fill, node in RenderTree(tree):
         tree_str += "%s%s" % (pre, node.name) + '\n'
 
-    f = open("parse_tree.txt", "w")
+    f = open("parse_tree.txt", "w", encoding='utf-8')
     f.write(tree_str.strip())
     f.close()
 
