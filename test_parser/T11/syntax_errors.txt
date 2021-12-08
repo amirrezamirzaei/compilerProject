@@ -1,0 +1,6 @@
+#2 : syntax error, illegal ID
+#2 : syntax error, missing Param
+#13 : syntax error, missing ID
+#13 : syntax error, illegal another_
+#13 : syntax error, missing Declaration-prime
+#13 : syntax error, missing $

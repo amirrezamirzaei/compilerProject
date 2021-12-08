@@ -9,7 +9,7 @@ int another_function(int a, int b){
 }
 
 void yet_another_function( ) {
-
+	int stg44;
 }
 
 int some_other_function ( ) {

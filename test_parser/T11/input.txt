@@ -27,6 +27,7 @@ int yet_another_function(int a, int b, int c) {
 	int =& 12& e;
 	int ; f ;
 	int 2 g;
+	int 3s2;
 	int == = * + - h;
 	int repeat i;
 	int if j;

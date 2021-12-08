@@ -1,0 +1,4 @@
+#7 : syntax error, missing ID
+#7 : syntax error, illegal another_
+#7 : syntax error, missing Declaration-prime
+#7 : syntax error, missing $
