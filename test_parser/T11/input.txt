@@ -22,6 +22,17 @@ int yet_another_function(int a, int b, int c) {
                      c = b = a;}
 	else
 	a == b;
+	int d;
+	int ;
+	int =& 12& e;
+	int ; f ;
+	int 2 g;
+	int == = * + - h;
+	int repeat i;
+	int if j;
+	int [ ( k;
+	int int l;
+	int { } m;
 	endif
 }
 
