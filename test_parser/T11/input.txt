@@ -1,0 +1,35 @@
+
+int function(int a, int b, c) {
+/* comment */
+// comment
+         if (a = b) {
+                                        c = b = a;
+                                 }
+         else
+               a == b;
+          endif
+}
+
+int another_function(int a, int b, int c) {
+      if ( a = b) { c = b = a;}
+      else
+               a == b;
+      endif
+}
+
+int yet_another_function(int a, int b, int c) {
+	if ( a == b){
+                     c = b = a;}
+	else
+	a == b;
+	endif
+}
+
+int last_but_not_least (int a, int b, int c) {
+	if (a == b)
+		c = b = a;
+	else
+		a = b;
+	endif
+}
+

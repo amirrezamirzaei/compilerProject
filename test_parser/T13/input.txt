@@ -1,0 +1,29 @@
+int function/*comment*/(int a, int b){
+
+	a = b + c;
+	return a;
+}
+
+int another_function(int a, int b){
+	return (a * b) + 2 + a;
+}
+
+void yet_another_function( ) {
+
+}
+
+int some_other_function ( ) {
+
+}
+
+void function (int a, int b) { }
+void function (int c) { }
+void tof_be_tamrine_maghale 
+(int 
+a)
+{
+ yet_another_function();
+	another_function       (      )        ;
+		int a; a=another_function(2,3); a=yet_another_function();
+			int b = another_function(1,2);
+}
