@@ -29,8 +29,6 @@
 #14 : syntax error, illegal *
 #14 : syntax error, illegal ==
 #18 : syntax error, illegal int
-#18 : syntax error, illegal e?
-#18 : syntax error, illegal &
 #18 : syntax error, illegal ID
 #18 : syntax error, missing )
 #18 : syntax error, missing ;

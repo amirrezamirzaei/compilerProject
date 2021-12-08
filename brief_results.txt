@@ -29,3 +29,45 @@
 
 
 =====================================>>>>> Running Test test_parser/T10...
+
+
+=====================================>>>>> Running Test test_parser/T11...
+Files syntax_errors.txt and test_parser/T11/syntax_errors.txt differ
+
+
+=====================================>>>>> Running Test test_parser/T12...
+
+
+=====================================>>>>> Running Test test_parser/T13...
+
+
+=====================================>>>>> Running Test test_parser/T14...
+Files parse_tree.txt and test_parser/T14/parse_tree.txt differ
+Files syntax_errors.txt and test_parser/T14/syntax_errors.txt differ
+
+
+=====================================>>>>> Running Test test_parser/T15...
+Files parse_tree.txt and test_parser/T15/parse_tree.txt differ
+Files syntax_errors.txt and test_parser/T15/syntax_errors.txt differ
+
+
+=====================================>>>>> Running Test test_parser/T16...
+
+
+=====================================>>>>> Running Test test_parser/T17...
+Files parse_tree.txt and test_parser/T17/parse_tree.txt differ
+Files syntax_errors.txt and test_parser/T17/syntax_errors.txt differ
+
+
+=====================================>>>>> Running Test test_parser/T18...
+Files syntax_errors.txt and test_parser/T18/syntax_errors.txt differ
+
+
+=====================================>>>>> Running Test test_parser/T19...
+Files parse_tree.txt and test_parser/T19/parse_tree.txt differ
+Files syntax_errors.txt and test_parser/T19/syntax_errors.txt differ
+
+
+=====================================>>>>> Running Test test_parser/T20...
+Files parse_tree.txt and test_parser/T20/parse_tree.txt differ
+Files syntax_errors.txt and test_parser/T20/syntax_errors.txt differ

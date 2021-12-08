@@ -4,13 +4,10 @@
 #25 : syntax error, illegal int
 #26 : syntax error, illegal int
 #27 : syntax error, illegal int
-#27 : syntax error, illegal =&
-#27 : syntax error, illegal 12&
 #28 : syntax error, illegal int
 #29 : syntax error, illegal int
 #29 : syntax error, illegal ID
 #30 : syntax error, illegal int
-#30 : syntax error, illegal 3s
 #31 : syntax error, illegal int
 #31 : syntax error, illegal ==
 #31 : syntax error, illegal =

@@ -1,7 +1,7 @@
 # Amirreza Mirzaei 98106112         Arman Soleimani 98105835
 
 from anytree import RenderTree
-from parsers.parser_predictive_recursive_descent import parse_predictive_recursive_descent
+from parsers.parser_transition_diagram import parse_transition_diagram
 # parse_predictive_recursive_descent
 
 def write_to_file(tree, errors):
@@ -22,5 +22,5 @@ def write_to_file(tree, errors):
     f.close()
 
 
-tree, errors = parse_predictive_recursive_descent()
+tree, errors = parse_transition_diagram()
 write_to_file(tree, errors)

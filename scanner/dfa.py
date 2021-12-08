@@ -153,6 +153,9 @@ def get_next_token(reader: Reader, result: ScannerResult):
     if token.type == TokenType.COMMENT:
         return get_next_token(reader, result)
 
+    if token.type == TokenType.ERROR:
+        return get_next_token(reader, result)
+
     if c == '':
         token.content = '$'
         token.type = TokenType.END
