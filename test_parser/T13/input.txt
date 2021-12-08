@@ -4,26 +4,26 @@ int function/*comment*/(int a, int b){
 	return a;
 }
 
-int another_function(int a, int b){
+int anotherfunction(int a, int b){
 	return (a * b) + 2 + a;
 }
 
-void yet_another_function( ) {
+void yetanotherfunction( ) {
 	int stg44;
 }
 
-int some_other_function ( ) {
+int someotherfunction ( ) {
 
 }
 
 void function (int a, int b) { }
 void function (int c) { }
-void tof_be_tamrine_maghale 
+void tofBeTamrineMaghale 
 (int 
 a)
 {
- yet_another_function();
-	another_function       (      )        ;
-		int a; a=another_function(2,3); a=yet_another_function();
-			int b = another_function(1,2);
+ yetanotherfunction();
+	anotherfunction       (      )        ;
+		int a; a=anotherfunction(2,3); a=yetanotherfunction();
+			int b = anotherfunction(1,2);
 }

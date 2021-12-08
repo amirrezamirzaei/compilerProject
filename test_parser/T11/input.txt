@@ -10,14 +10,14 @@ int function(int a, int b, c) {
           endif
 }
 
-int another_function(int a, int b, int c) {
+int anotherfunction(int a, int b, int c) {
       if ( a = b) { c = b = a;}
       else
                a == b;
       endif
 }
 
-int yet_another_function(int a, int b, int c) {
+int yetanotherfunction(int a, int b, int c) {
 	if ( a == b){
                      c = b = a;}
 	else
@@ -37,7 +37,7 @@ int yet_another_function(int a, int b, int c) {
 	endif
 }
 
-int last_but_not_least (int a, int b, int c) {
+int lastbutnotleast (int a, int b, int c) {
 	if (a == b)
 		c = b = a;
 	else

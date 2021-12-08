@@ -1,3 +1,5 @@
+# Amirreza Mirzaei 98106112         Arman Soleimani 98105835
+
 from anytree import RenderTree
 from parsers.parser_transition_diagram import parse_transition_diagram
 
