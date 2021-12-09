@@ -1,0 +1,6 @@
+#2 : syntax error, missing Params
+#4 : syntax error, illegal ==
+#4 : syntax error, illegal void
+#4 : syntax error, illegal *
+#4 : syntax error, missing Expression
+#4 : syntax error, illegal NUM

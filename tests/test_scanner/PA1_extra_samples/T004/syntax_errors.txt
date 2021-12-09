@@ -1,0 +1,6 @@
+#2 : syntax error, missing Params
+#5 : syntax error, missing ID
+#5 : syntax error, illegal *
+#5 : syntax error, missing Declaration-prime
+#9 : syntax error, illegal *
+#11 : syntax error, illegal *

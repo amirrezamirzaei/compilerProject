@@ -1,0 +1,5 @@
+#2 : syntax error, missing Params
+#7 : syntax error, illegal <
+#7 : syntax error, illegal =
+#7 : syntax error, illegal NUM
+#10 : syntax error, missing Else-stmt

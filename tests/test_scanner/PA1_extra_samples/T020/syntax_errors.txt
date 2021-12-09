@@ -1,0 +1,10 @@
+#2 : syntax error, missing Params
+#4 : syntax error, illegal ,
+#4 : syntax error, illegal *
+#4 : syntax error, missing Declaration-prime
+#4 : syntax error, missing ;
+#4 : syntax error, illegal ,
+#4 : syntax error, illegal *
+#4 : syntax error, illegal *
+#9 : syntax error, illegal *
+#9 : syntax error, illegal *

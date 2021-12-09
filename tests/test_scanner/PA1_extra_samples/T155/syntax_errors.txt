@@ -1,0 +1,3 @@
+#5 : syntax error, illegal int
+#5 : syntax error, missing Expression
+#5 : syntax error, illegal NUM

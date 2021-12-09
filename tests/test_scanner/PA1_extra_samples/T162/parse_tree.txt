@@ -1,0 +1,19 @@
+Program
+└── Declaration-list
+    ├── Declaration
+    │   ├── Declaration-initial
+    │   │   ├── Type-specifier
+    │   │   │   └── (KEYWORD, void)
+    │   │   └── (ID, foo)
+    │   └── Declaration-prime
+    │       └── Fun-declaration-prime
+    │           ├── (SYMBOL, ()
+    │           ├── Params
+    │           │   ├── (KEYWORD, int)
+    │           │   ├── Param-prime
+    │           │   │   └── (SYMBOL, [)
+    │           │   └── Param-list
+    │           │       └── epsilon
+    │           └── (SYMBOL, ))
+    └── Declaration-list
+        └── epsilon

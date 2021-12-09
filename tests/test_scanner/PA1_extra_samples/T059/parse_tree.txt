@@ -1,0 +1,74 @@
+Program
+├── Declaration-list
+│   ├── Declaration
+│   │   ├── Declaration-initial
+│   │   │   ├── Type-specifier
+│   │   │   │   └── (KEYWORD, int)
+│   │   │   └── (ID, main)
+│   │   └── Declaration-prime
+│   │       └── Fun-declaration-prime
+│   │           ├── (SYMBOL, ()
+│   │           ├── (SYMBOL, ))
+│   │           └── Compound-stmt
+│   │               ├── (SYMBOL, {)
+│   │               ├── Declaration-list
+│   │               │   └── epsilon
+│   │               ├── Statement-list
+│   │               │   ├── Statement
+│   │               │   │   └── Selection-stmt
+│   │               │   │       ├── (KEYWORD, if)
+│   │               │   │       ├── (SYMBOL, ()
+│   │               │   │       ├── Expression
+│   │               │   │       │   └── Simple-expression-zegond
+│   │               │   │       │       ├── Additive-expression-zegond
+│   │               │   │       │       │   ├── Term-zegond
+│   │               │   │       │       │   │   ├── Factor-zegond
+│   │               │   │       │       │   │   │   └── (NUM, 97)
+│   │               │   │       │       │   │   └── G
+│   │               │   │       │       │   │       └── epsilon
+│   │               │   │       │       │   └── D
+│   │               │   │       │       │       └── epsilon
+│   │               │   │       │       └── C
+│   │               │   │       │           └── epsilon
+│   │               │   │       ├── (SYMBOL, ))
+│   │               │   │       └── Statement
+│   │               │   │           └── Return-stmt
+│   │               │   │               ├── (KEYWORD, return)
+│   │               │   │               └── Return-stmt-prime
+│   │               │   │                   ├── Expression
+│   │               │   │                   │   └── Simple-expression-zegond
+│   │               │   │                   │       ├── Additive-expression-zegond
+│   │               │   │                   │       │   ├── Term-zegond
+│   │               │   │                   │       │   │   ├── Factor-zegond
+│   │               │   │                   │       │   │   │   └── (NUM, 1)
+│   │               │   │                   │       │   │   └── G
+│   │               │   │                   │       │   │       └── epsilon
+│   │               │   │                   │       │   └── D
+│   │               │   │                   │       │       └── epsilon
+│   │               │   │                   │       └── C
+│   │               │   │                   │           └── epsilon
+│   │               │   │                   └── (SYMBOL, ;)
+│   │               │   └── Statement-list
+│   │               │       ├── Statement
+│   │               │       │   └── Return-stmt
+│   │               │       │       ├── (KEYWORD, return)
+│   │               │       │       └── Return-stmt-prime
+│   │               │       │           ├── Expression
+│   │               │       │           │   └── Simple-expression-zegond
+│   │               │       │           │       ├── Additive-expression-zegond
+│   │               │       │           │       │   ├── Term-zegond
+│   │               │       │           │       │   │   ├── Factor-zegond
+│   │               │       │           │       │   │   │   └── (NUM, 0)
+│   │               │       │           │       │   │   └── G
+│   │               │       │           │       │   │       └── epsilon
+│   │               │       │           │       │   └── D
+│   │               │       │           │       │       └── epsilon
+│   │               │       │           │       └── C
+│   │               │       │           │           └── epsilon
+│   │               │       │           └── (SYMBOL, ;)
+│   │               │       └── Statement-list
+│   │               │           └── epsilon
+│   │               └── (SYMBOL, })
+│   └── Declaration-list
+│       └── epsilon
+└── $

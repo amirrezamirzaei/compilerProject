@@ -1,0 +1,8 @@
+#2 : syntax error, missing Params
+#4 : syntax error, illegal ID
+#4 : syntax error, illegal =
+#4 : syntax error, illegal NUM
+#5 : syntax error, illegal ID
+#5 : syntax error, illegal =
+#5 : syntax error, illegal NUM
+#7 : syntax error, illegal =

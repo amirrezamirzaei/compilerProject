@@ -1,0 +1,6 @@
+#4 : syntax error, illegal {
+#5 : syntax error, illegal if
+#6 : syntax error, illegal break
+#7 : syntax error, illegal else
+#9 : syntax error, illegal until
+#9 : syntax error, missing $

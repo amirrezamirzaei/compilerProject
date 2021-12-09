@@ -1,0 +1,4 @@
+#1 : syntax error, missing NUM
+#1 : syntax error, missing ;
+#1 : syntax error, illegal =
+#1 : syntax error, missing $

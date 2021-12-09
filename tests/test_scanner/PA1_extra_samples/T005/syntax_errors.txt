@@ -1,0 +1,15 @@
+#2 : syntax error, missing Params
+#5 : syntax error, missing ID
+#5 : syntax error, illegal *
+#5 : syntax error, missing Declaration-prime
+#6 : syntax error, illegal int
+#6 : syntax error, illegal *
+#6 : syntax error, illegal *
+#12 : syntax error, illegal *
+#14 : syntax error, missing Else-stmt
+#14 : syntax error, illegal *
+#14 : syntax error, illegal *
+#17 : syntax error, illegal *
+#17 : syntax error, illegal *
+#19 : syntax error, missing endif
+#23 : syntax error, missing endif

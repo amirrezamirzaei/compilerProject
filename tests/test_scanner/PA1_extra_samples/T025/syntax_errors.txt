@@ -1,0 +1,5 @@
+#1 : syntax error, illegal ID
+#1 : syntax error, illegal *
+#1 : syntax error, missing Params
+#1 : syntax error, missing Compound-stmt
+#1 : syntax error, missing $

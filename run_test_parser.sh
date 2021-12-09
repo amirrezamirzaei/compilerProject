@@ -2,10 +2,9 @@
 
 echo "" > log.txt
 echo "" > brief_results.txt
-#for dir in ../PA1_final_tests/*; do
 for dir in test_parser/*; do
     cp "${dir}/input.txt" ./input.txt
-    python compiler.py
+    python3 compiler.py
     printf "\n\n\n\n=====================================>>>>> Running Test ${dir}...\n" >> log.txt
     printf "\n\n=====================================>>>>> Running Test ${dir}...\n" >> brief_results.txt
     printf "\n\n              *** parse_tree.txt diffrences ***\n" >> log.txt
@@ -16,3 +15,14 @@ for dir in test_parser/*; do
     diff -y -B -W 250 -w -q syntax_errors.txt "${dir}/syntax_errors.txt" >> brief_results.txt
 done
 
+#for dir in tests/test_scanner/PA1_input_output_samples/*; do
+#    cd "${dir}"
+#    python3 ../../../../compiler.py
+#    cd ../../../..
+# done
+
+#for dir in tests/test_scanner/PA1_extra_samples/*; do
+#    cd "${dir}"
+#    python3 ../../../../compiler.py
+#    cd ../../../..
+#done

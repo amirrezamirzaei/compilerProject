@@ -1,0 +1,18 @@
+Program
+└── Declaration-list
+    ├── Declaration
+    │   ├── Declaration-initial
+    │   │   ├── Type-specifier
+    │   │   │   └── (KEYWORD, int)
+    │   │   └── (ID, x)
+    │   └── Declaration-prime
+    │       └── Var-declaration-prime
+    │           └── (SYMBOL, ;)
+    └── Declaration-list
+        ├── Declaration
+        │   └── Declaration-initial
+        │       ├── Type-specifier
+        │       │   └── (KEYWORD, int)
+        │       └── (ID, x)
+        └── Declaration-list
+            └── epsilon

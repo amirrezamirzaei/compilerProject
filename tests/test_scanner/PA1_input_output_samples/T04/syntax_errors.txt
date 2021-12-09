@@ -1,0 +1,12 @@
+#1 : syntax error, illegal ID
+#1 : syntax error, missing Params
+#6 : syntax error, illegal NUM
+#9 : syntax error, missing Else-stmt
+#10 : syntax error, missing until
+#10 : syntax error, missing (
+#10 : syntax error, illegal }
+#10 : syntax error, illegal until
+#11 : syntax error, illegal ID
+#11 : syntax error, illegal =
+#11 : syntax error, illegal NUM
+#11 : syntax error, missing )

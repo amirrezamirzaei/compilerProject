@@ -1,0 +1,14 @@
+#2 : syntax error, missing Params
+#4 : syntax error, illegal ,
+#4 : syntax error, illegal *
+#4 : syntax error, missing Declaration-prime
+#8 : syntax error, missing Else-stmt
+#8 : syntax error, illegal NUM
+#10 : syntax error, missing Else-stmt
+#12 : syntax error, missing Else-stmt
+#12 : syntax error, illegal int
+#14 : syntax error, missing Else-stmt
+#14 : syntax error, illegal =
+#14 : syntax error, illegal ID
+#14 : syntax error, illegal ID
+#16 : syntax error, missing Else-stmt

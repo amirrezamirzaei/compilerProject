@@ -1,0 +1,92 @@
+Program
+└── Declaration-list
+    ├── Declaration
+    │   ├── Declaration-initial
+    │   │   ├── Type-specifier
+    │   │   │   └── (KEYWORD, int)
+    │   │   └── (ID, f2)
+    │   └── Declaration-prime
+    │       └── Fun-declaration-prime
+    │           ├── (SYMBOL, ()
+    │           ├── Params
+    │           │   ├── (KEYWORD, int)
+    │           │   ├── (ID, c)
+    │           │   ├── Param-prime
+    │           │   │   └── epsilon
+    │           │   └── Param-list
+    │           │       ├── (SYMBOL, ,)
+    │           │       ├── Param
+    │           │       │   ├── Declaration-initial
+    │           │       │   │   ├── Type-specifier
+    │           │       │   │   │   └── (KEYWORD, int)
+    │           │       │   │   └── (ID, b)
+    │           │       │   └── Param-prime
+    │           │       │       └── epsilon
+    │           │       └── Param-list
+    │           │           └── epsilon
+    │           ├── (SYMBOL, ))
+    │           └── Compound-stmt
+    │               ├── (SYMBOL, {)
+    │               ├── Declaration-list
+    │               │   └── epsilon
+    │               ├── Statement-list
+    │               │   ├── Statement
+    │               │   │   └── Return-stmt
+    │               │   │       ├── (KEYWORD, return)
+    │               │   │       └── Return-stmt-prime
+    │               │   │           ├── Expression
+    │               │   │           │   ├── (ID, c)
+    │               │   │           │   └── B
+    │               │   │           │       └── Simple-expression-prime
+    │               │   │           │           ├── Additive-expression-prime
+    │               │   │           │           │   ├── Term-prime
+    │               │   │           │           │   │   ├── Factor-prime
+    │               │   │           │           │   │   │   └── epsilon
+    │               │   │           │           │   │   └── G
+    │               │   │           │           │   │       └── epsilon
+    │               │   │           │           │   └── D
+    │               │   │           │           │       ├── Addop
+    │               │   │           │           │       │   └── (SYMBOL, -)
+    │               │   │           │           │       ├── Term
+    │               │   │           │           │       │   ├── Factor
+    │               │   │           │           │       │   │   ├── (ID, b)
+    │               │   │           │           │       │   │   └── Var-call-prime
+    │               │   │           │           │       │   │       └── Var-prime
+    │               │   │           │           │       │   │           └── epsilon
+    │               │   │           │           │       │   └── G
+    │               │   │           │           │       │       └── epsilon
+    │               │   │           │           │       └── D
+    │               │   │           │           │           └── epsilon
+    │               │   │           │           └── C
+    │               │   │           │               └── epsilon
+    │               │   │           └── (SYMBOL, ;)
+    │               │   └── Statement-list
+    │               │       └── epsilon
+    │               └── (SYMBOL, })
+    └── Declaration-list
+        ├── Declaration
+        │   ├── Declaration-initial
+        │   │   └── Type-specifier
+        │   │       └── (KEYWORD, int)
+        │   └── Declaration-prime
+        │       └── Fun-declaration-prime
+        │           ├── (SYMBOL, ()
+        │           ├── Params
+        │           │   ├── (KEYWORD, int)
+        │           │   ├── (ID, a)
+        │           │   ├── Param-prime
+        │           │   │   └── epsilon
+        │           │   └── Param-list
+        │           │       ├── (SYMBOL, ,)
+        │           │       ├── Param
+        │           │       │   ├── Declaration-initial
+        │           │       │   │   ├── Type-specifier
+        │           │       │   │   │   └── (KEYWORD, int)
+        │           │       │   │   └── (ID, b)
+        │           │       │   └── Param-prime
+        │           │       │       └── epsilon
+        │           │       └── Param-list
+        │           │           └── epsilon
+        │           └── (SYMBOL, ))
+        └── Declaration-list
+            └── epsilon

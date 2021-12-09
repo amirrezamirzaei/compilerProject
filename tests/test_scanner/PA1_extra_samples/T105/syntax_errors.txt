@@ -1,0 +1,14 @@
+#2 : syntax error, missing Params
+#6 : syntax error, illegal ;
+#6 : syntax error, illegal ID
+#6 : syntax error, illegal <
+#6 : syntax error, illegal NUM
+#6 : syntax error, illegal ;
+#6 : syntax error, illegal ID
+#6 : syntax error, illegal +
+#6 : syntax error, illegal +
+#7 : syntax error, illegal if
+#7 : syntax error, illegal (
+#7 : syntax error, illegal ID
+#7 : syntax error, missing ;
+#7 : syntax error, illegal )

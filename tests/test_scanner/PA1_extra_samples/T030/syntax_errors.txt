@@ -1,0 +1,16 @@
+#2 : syntax error, missing Params
+#8 : syntax error, missing Params
+#10 : syntax error, illegal NUM
+#12 : syntax error, missing Else-stmt
+#12 : syntax error, illegal =
+#12 : syntax error, illegal NUM
+#14 : syntax error, missing Else-stmt
+#16 : syntax error, missing Else-stmt
+#16 : syntax error, illegal =
+#18 : syntax error, missing Else-stmt
+#20 : syntax error, missing Else-stmt
+#20 : syntax error, illegal =
+#20 : syntax error, illegal ID
+#20 : syntax error, illegal (
+#20 : syntax error, illegal )
+#22 : syntax error, missing Else-stmt

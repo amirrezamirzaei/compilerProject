@@ -1,0 +1,8 @@
+#15 : syntax error, missing Additive-expression
+#18 : syntax error, missing endif
+#25 : syntax error, illegal -
+#25 : syntax error, missing Term
+#27 : syntax error, missing Term
+#30 : syntax error, illegal -
+#32 : syntax error, missing Else-stmt
+#38 : syntax error, missing endif

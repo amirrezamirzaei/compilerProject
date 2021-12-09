@@ -1,0 +1,7 @@
+#2 : syntax error, missing Params
+#5 : syntax error, missing ID
+#5 : syntax error, illegal *
+#5 : syntax error, missing Declaration-prime
+#8 : syntax error, illegal =
+#9 : syntax error, illegal *
+#13 : syntax error, missing Else-stmt

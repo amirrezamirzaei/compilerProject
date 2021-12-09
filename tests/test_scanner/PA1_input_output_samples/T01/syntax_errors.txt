@@ -1,0 +1,5 @@
+#2 : syntax error, illegal =
+#2 : syntax error, missing Declaration-prime
+#7 : syntax error, missing Additive-expression
+#16 : syntax error, missing endif
+#17 : syntax error, missing }

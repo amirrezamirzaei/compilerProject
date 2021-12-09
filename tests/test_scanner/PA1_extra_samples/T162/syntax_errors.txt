@@ -1,0 +1,6 @@
+#1 : syntax error, missing ID
+#1 : syntax error, missing ]
+#1 : syntax error, illegal NUM
+#1 : syntax error, illegal ]
+#1 : syntax error, missing Compound-stmt
+#1 : syntax error, missing $
