@@ -676,9 +676,10 @@ class TransitionDiagram:
             if not self.parsing_EOF:
                 self.errors.append(f'#{self.current_token.line} : syntax error, missing {terminal}')
 
-    def is_in_first(self, non_terminal, token):
-        return token.get_terminal_form() in self.grammar[non_terminal]['First'] or (
-                'EPSILON' in self.grammar[non_terminal]['First'])
+    def is_in_first(self, non_terminal, token, father=''):
+        return token.get_terminal_form() in self.grammar[non_terminal]['First'] or \
+               ('EPSILON' in self.grammar[non_terminal]['First'] and token.get_terminal_form() in
+                self.grammar[non_terminal]['Follow'])
 
     def is_in_follow(self, non_terminal, token):
         return token.get_terminal_form() in self.grammar[non_terminal]['Follow']
