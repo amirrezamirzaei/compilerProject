@@ -42,7 +42,7 @@ class TransitionDiagram:
             self.parsing_stack.append(('$', node))
             self.parsing_stack.append((self.parse_Declaration_list, node))
         else:  # error
-            pass
+            self.handle_error_non_terminal('Program', token, self.parse_Program, node)
 
     def parse_Declaration_list(self, node):
         token = self.get_terminal()
@@ -676,7 +676,7 @@ class TransitionDiagram:
             if not self.parsing_EOF:
                 self.errors.append(f'#{self.current_token.line} : syntax error, missing {terminal}')
 
-    def is_in_first(self, non_terminal, token, father=''):
+    def is_in_first(self, non_terminal, token):
         return token.get_terminal_form() in self.grammar[non_terminal]['First'] or \
                ('EPSILON' in self.grammar[non_terminal]['First'] and token.get_terminal_form() in
                 self.grammar[non_terminal]['Follow'])
