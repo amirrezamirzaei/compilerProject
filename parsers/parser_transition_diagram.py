@@ -53,7 +53,7 @@ class TransitionDiagram:
             self.parsing_stack.append((self.parse_Declaration_list, node))
             self.parsing_stack.append((self.parse_Declaration, node))
         # Declaration-list -> EPSILON
-        elif token.get_terminal_form() in self.grammar['Declaration']['Follow']:
+        elif token.get_terminal_form() in self.grammar['Declaration-list']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
             self.handle_error_non_terminal('Declaration-list', token, self.parse_Declaration_list, node)
@@ -185,7 +185,7 @@ class TransitionDiagram:
         if token.get_terminal_form() == '[':
             self.parsing_stack.append((']', node))
             self.parsing_stack.append(('[', node))
-        # Param-list -> EPSILON
+        # Param-prime -> EPSILON
         elif token.get_terminal_form() in self.grammar['Param-prime']['Follow']:
             Node("epsilon", parent=node)
         else:  # error
