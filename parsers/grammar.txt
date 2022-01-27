@@ -1,15 +1,27 @@
-Program -> Declaration-list $
+Program -> #begin Declaration-list $
 Declaration-list -> Declaration Declaration-list | EPSILON
+Declaration-list -> EPSILON
 Declaration -> Declaration-initial Declaration-prime
-Declaration-initial ->  Type-specifier ID
-Declaration-prime -> Fun-declaration-prime | Var-declaration-prime
-Var-declaration-prime -> ; | [ NUM ] ;
-Fun-declaration-prime ->  ( Params ) Compound-stmt
-Type-specifier -> int | void
-Params -> int ID Param-prime Param-list | void
-Param-list -> , Param Param-list | EPSILON
+Declaration-initial ->  #save_type Type-specifier #create_symbol ID
+Declaration-prime -> #func_start Fun-declaration-prime
+Declaration-prime -> Var-declaration-prime
+Var-declaration-prime -> ; #set_kind_to_var
+Var-declaration-prime -> ; | [ #set_kind_to_var NUM ] ;
+Fun-declaration-prime ->  #new_scope ( Params ) #save_stack #save_stack Compound-stmt #end_scope
+Type-specifier -> int
+Type-specifier -> void
+
+
+Params -> #save_type int #create_symbol ID #set_kind_to_var Param-prime Param-list #increase_fun_arg
+Params -> void
+Param-list -> #increase_func_arg, Param Param-list | EPSILON
+Param-list -> EPSILON
+
+
+
 Param -> Declaration-initial Param-prime
 Param-prime -> [  ] | EPSILON
+
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list | EPSILON
 Statement -> Expression-stmt | Compound-stmt | Selection-stmt | Iteration-stmt | Return-stmt

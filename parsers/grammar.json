@@ -1,226 +1,395 @@
 {
+  "TERMINALS" : ["ID",";","[","NUM","]","(",")","int","void",",","{","}","break","if","endif","else","repeat","until","return","=","<","==","+","-","*"],
   "Program": {
     "First": ["int","void","EPSILON"],
-    "Follow": ["$"]
+    "Follow": ["$"],
+    "Rules": {
+      "1" : ["Declaration-list", "$"]
+    }
   },
 
   "Declaration-list": {
     "First": ["int","void","EPSILON"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","repeat","return","$"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","repeat","return","$"],
+    "Rules": {
+      "1" : ["Declaration" ,"Declaration-list"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Declaration": {
     "First": ["int","void"],
-    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"],
+    "Rules": {
+      "1" : ["Declaration-initial" ,"Declaration-prime"]
+    }
   },
 
   "Declaration-initial": {
     "First": ["int","void"],
-    "Follow": [";","[","(",")",","]
+    "Follow": [";","[","(",")",","],
+    "Rules": {
+      "1" : ["Type-specifier" ,"ID"]
+    }
   },
 
   "Declaration-prime": {
     "First": [";","[","("],
-    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"],
+    "Rules": {
+      "1" : ["Fun-declaration-prime"],
+      "2" : ["Var-declaration-prime"]
+    }
   },
 
   "Var-declaration-prime": {
     "First": [";","["],
-    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"],
+    "Rules": {
+      "1" : [";"],
+      "2" : ["[","NUM","]",";"]
+    }
   },
 
   "Fun-declaration-prime": {
     "First": ["("],
-    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"]
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","repeat","return","$"],
+    "Rules": {
+      "1" : ["(", "Params", ")", "Compound-stmt"]
+    }
   },
 
   "Type-specifier": {
     "First": ["int","void"],
-    "Follow": ["ID"]
+    "Follow": ["ID"],
+    "Rules": {
+      "1" : ["int"],
+      "2" : ["void"]
+    }
   },
 
   "Params": {
     "First": ["int","void"],
-    "Follow": [")"]
+    "Follow": [")"],
+    "Rules": {
+      "1" : ["int", "ID", "Param-prime", "Param-list"],
+      "2" : ["void"]
+    }
   },
 
   "Param-list": {
     "First": [",","EPSILON"],
-    "Follow": [")"]
+    "Follow": [")"],
+    "Rules": {
+      "1" : [",","Param","Param-list"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Param": {
     "First": ["int","void"],
-    "Follow": [")",","]
+    "Follow": [")",","],
+    "Rules": {
+      "1": ["Declaration-initial", "Param-prime"]
+    }
   },
 
   "Param-prime": {
     "First": ["[","EPSILON"],
-    "Follow": [")",","]
+    "Follow": [")",","],
+    "Rules": {
+      "1" : ["[","]"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Compound-stmt": {
     "First": ["{"],
-    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","endif","else","repeat","until","return","$"]
+    "Follow": ["ID",";","NUM","(","int","void","{","}","break","if","endif","else","repeat","until","return","$"],
+    "Rules": {
+      "1" : ["{","Declaration-list","Statement-list","}"]
+    }
   },
 
   "Statement-list": {
     "First": ["ID",";","NUM","(","{","break","if","repeat","return","EPSILON"],
-    "Follow": ["}"]
+    "Follow": ["}"],
+    "Rules": {
+      "1" : ["Statement","Statement-list"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Statement": {
     "First": ["ID",";","NUM","(","{","break","if","repeat","return"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : ["Expression-stmt"],
+      "2" : ["Compound-stmt"],
+      "3" : ["Selection-stmt"],
+      "4" : ["Iteration-stmt"],
+      "5" : ["Return-stmt"]
+    }
   },
 
   "Expression-stmt": {
     "First": ["ID",";","NUM","(","break"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : ["Expression",";"],
+      "2" : ["break", ";"],
+      "3" : [";"]
+    }
   },
 
   "Selection-stmt": {
     "First": ["if"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : ["if","(","Expression",")","Statement","Else-stmt"]
+    }
   },
 
   "Else-stmt": {
     "First": ["endif","else"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : ["endif"],
+      "2" : ["else", "Statement", "endif"]
+    }
   },
 
   "Iteration-stmt": {
     "First": ["repeat"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : ["repeat","Statement","until","(","Expression",")"]
+    }
   },
 
   "Return-stmt": {
     "First": ["return"],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : ["return","Return-stmt-prime"]
+    }
   },
 
   "Return-stmt-prime": {
     "First": ["ID",";","NUM","("],
-    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"]
+    "Follow": ["ID",";","NUM","(","{","}","break","if","endif","else","repeat","until","return"],
+    "Rules": {
+      "1" : [";"],
+      "2" : ["Expression", ";"]
+    }
   },
 
   "Expression": {
     "First": ["ID","NUM","("],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["Simple-expression-zegond"],
+      "2" : ["ID", "B"]
+    }
   },
 
   "B": {
     "First": ["[","(","=","<","==","+","-","*","EPSILON"],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["=","Expression"],
+      "2" : ["[", "Expression", "]", "H"],
+      "3" : ["Simple-expression-prime"]
+    }
   },
 
   "H": {
     "First": ["=","<","==","+","-","*","EPSILON"],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["=","Expression"],
+      "2" : ["G", "D", "C"]
+    }
   },
 
   "Simple-expression-zegond": {
     "First": ["NUM","("],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["Additive-expression-zegond","C"]
+    }
   },
 
   "Simple-expression-prime": {
     "First": ["(","<","==","+","-","*","EPSILON"],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["Additive-expression-prime","C"]
+    }
   },
 
   "C": {
     "First": ["<","==","EPSILON"],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["Relop","Additive-expression"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Relop": {
     "First": ["<","=="],
-    "Follow": ["ID","NUM","("]
+    "Follow": ["ID","NUM","("],
+    "Rules": {
+      "1" : ["<"],
+      "2" : ["=="]
+    }
   },
 
   "Additive-expression": {
     "First": ["ID","NUM","("],
-    "Follow": [";","]",")",","]
+    "Follow": [";","]",")",","],
+    "Rules": {
+      "1" : ["Term", "D"]
+    }
   },
 
   "Additive-expression-prime": {
     "First": ["(","+","-","*","EPSILON"],
-    "Follow": [";","]",")",",","<","=="]
+    "Follow": [";","]",")",",","<","=="],
+    "Rules": {
+      "1" : ["Term-prime", "D"]
+    }
   },
 
   "Additive-expression-zegond": {
     "First": ["NUM","("],
-    "Follow": [";","]",")",",","<","=="]
+    "Follow": [";","]",")",",","<","=="],
+    "Rules": {
+      "1" : ["Term-zegond", "D"]
+    }
   },
 
   "D": {
     "First": ["+","-","EPSILON"],
-    "Follow": [";","]",")",",","<","=="]
+    "Follow": [";","]",")",",","<","=="],
+    "Rules": {
+      "1" : ["Addop","Term","D"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Addop": {
     "First": ["+","-"],
-    "Follow": ["ID","NUM","("]
+    "Follow": ["ID","NUM","("],
+    "Rules": {
+      "1" : ["+"],
+      "2" : ["-"]
+    }
   },
 
   "Term": {
     "First": ["ID","NUM","("],
-    "Follow": [";","]",")",",","<","==","+","-"]
+    "Follow": [";","]",")",",","<","==","+","-"],
+    "Rules": {
+      "1" : ["Factor","G"]
+    }
   },
 
   "Term-prime": {
     "First": ["(","*","EPSILON"],
-    "Follow": [";","]",")",",","<","==","+","-"]
+    "Follow": [";","]",")",",","<","==","+","-"],
+    "Rules": {
+      "1" : ["Factor-prime","G"]
+    }
   },
 
   "Term-zegond": {
     "First": ["NUM","("],
-    "Follow": [";","]",")",",","<","==","+","-"]
+    "Follow": [";","]",")",",","<","==","+","-"],
+    "Rules": {
+      "1" : ["Factor-zegond","G"]
+    }
   },
 
   "G": {
     "First": ["*","EPSILON"],
-    "Follow": [";","]",")",",","<","==","+","-"]
+    "Follow": [";","]",")",",","<","==","+","-"],
+    "Rules": {
+      "1" : ["*","Factor","G"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Factor": {
     "First": ["ID","NUM","("],
-    "Follow": [";","]",")",",","<","==","+","-","*"]
+    "Follow": [";","]",")",",","<","==","+","-","*"],
+    "Rules": {
+      "1" : ["(","Expression",")"],
+      "2" : ["ID","Var-call-prime"],
+      "3" : ["NUM"]
+    }
   },
 
   "Var-call-prime": {
     "First": ["[","(","EPSILON"],
-    "Follow": [";","]",")",",","<","==","+","-","*"]
+    "Follow": [";","]",")",",","<","==","+","-","*"],
+    "Rules": {
+      "1" : ["(","Args",")"],
+      "2" : ["Var-prime"]
+    }
   },
 
   "Var-prime": {
     "First": ["[","EPSILON"],
-    "Follow": [";","]",")",",","<","==","+","-","*"]
+    "Follow": [";","]",")",",","<","==","+","-","*"],
+    "Rules": {
+      "1" : ["[","Expression","]"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Factor-prime": {
     "First": ["(","EPSILON"],
-    "Follow": [";","]",")",",","<","==","+","-","*"]
+    "Follow": [";","]",")",",","<","==","+","-","*"],
+    "Rules": {
+      "1" : ["(","Args",")"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Factor-zegond": {
     "First": ["NUM","("],
-    "Follow": [";","]",")",",","<","==","+","-","*"]
+    "Follow": [";","]",")",",","<","==","+","-","*"],
+    "Rules": {
+      "1" : ["(","Expression",")"],
+      "2" : ["NUM"]
+    }
   },
 
   "Args": {
     "First": ["ID","NUM","(","EPSILON"],
-    "Follow": [")"]
+    "Follow": [")"],
+    "Rules": {
+      "1" : ["Arg-list"],
+      "2" : ["EPSILON"]
+    }
   },
 
   "Arg-list": {
     "First": ["ID","NUM","("],
-    "Follow": [")"]
+    "Follow": [")"],
+    "Rules": {
+      "1" : ["Expression","Arg-list-prime"]
+    }
   },
 
   "Arg-list-prime": {
     "First": [",","EPSILON"],
-    "Follow": [")"]
+    "Follow": [")"],
+    "Rules": {
+      "1" : [",","Expression","Arg-list-prime"],
+      "2" : ["EPSILON"]
+    }
   }
 }

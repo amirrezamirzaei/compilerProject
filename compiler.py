@@ -1,26 +1,33 @@
 # Amirreza Mirzaei 98106112         Arman Soleimani 98105835
-
-from anytree import RenderTree
 from parsers.parser_transition_diagram import parse_transition_diagram
-# parse_predictive_recursive_descent
 
-def write_to_file(tree, errors):
-    tree_str = ''
-    for pre, fill, node in RenderTree(tree):
-        tree_str += "%s%s" % (pre, node.name) + '\n'
 
-    f = open("parse_tree.txt", "w", encoding='utf-8')
-    f.write(tree_str.strip())
-    f.close()
+def write_to_file(code, errors):
+    if semantic_errors:
+        string_to_write = ''
+        for error in semantic_errors:
+            string_to_write += error + '\n'
 
-    f = open("syntax_errors.txt", "w")
-    if errors:
-        for item in errors:
-            f.write("%s\n" % item)
+        f = open("semantic_errors.txt", "w", encoding='utf-8')
+        f.write(string_to_write.strip())
+        f.close()
     else:
-        f.write('There is no syntax error.')
-    f.close()
+        string_to_write = ''
+        for line in code:
+            string_to_write += line + '\n'
+
+        f = open("output.txt", "w", encoding='utf-8')
+        f.write(string_to_write.strip())
+        f.close()
+
+        f = open("expected.txt", "w")
+        f.write('will be added.')
+        f.close()
+
+        f = open("semantic_errors.txt", "w")
+        f.write('The input program is semantically correct.')
+        f.close()
 
 
-tree, errors = parse_transition_diagram()
-write_to_file(tree, errors)
+tree, parse_errors, three_address_code, semantic_errors = parse_transition_diagram()
+write_to_file(three_address_code, semantic_errors)

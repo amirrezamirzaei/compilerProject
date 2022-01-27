@@ -1,9 +1,5 @@
 /*===== Sample 1 =====*/
-int a;
 int foo(int x){
-	int a;
-	int b;
-	int c;
 	if (x < 0){
 		output(x);
 		return 1;

@@ -1,4 +1,6 @@
 import json
+
+from parsers.three_code_generator import ThreeCodeGenerator
 from scanner import Reader, ScannerResult, get_next_token
 from anytree import Node
 from scanner.const import TokenType
@@ -7,7 +9,10 @@ from scanner.const import TokenType
 def parse_transition_diagram():
     t = TransitionDiagram(Reader('input.txt'), ScannerResult())
     tree, errors = t.parse()
-    return tree, errors
+    # for symbol in t.Gen.SymbolTable.symbol_table:
+    #     print(symbol)
+    # print(t.Gen.SymbolTable.symbol_stack)
+    return tree, errors, t.Gen.program_block, t.Gen.semantic_errors
 
 
 class TransitionDiagram:
@@ -20,6 +25,7 @@ class TransitionDiagram:
         self.errors = []
         self.parsing_EOF = False  # will be set to True when unexpected EOF occurs
         self.parsing_stack = []
+        self.Gen = ThreeCodeGenerator()
 
     def parse(self):
         root = Node("Program")
@@ -29,9 +35,11 @@ class TransitionDiagram:
             if hasattr(top_stack[0], '__call__'):
                 func, tree = top_stack
                 func(tree)
-            else:
+            elif top_stack[0][0] != '#':
                 terminal, tree = top_stack
                 self.match_terminal(terminal, tree)
+            else:
+                self.Gen.semantic_action(top_stack, self.current_token)
         return root, self.errors
 
     def parse_Program(self, node):
@@ -41,6 +49,7 @@ class TransitionDiagram:
         if self.is_in_first('Declaration-list', token):
             self.parsing_stack.append(('$', node))
             self.parsing_stack.append((self.parse_Declaration_list, node))
+            self.parsing_stack.append('#begin')  # gen
         else:  # error
             self.handle_error_non_terminal('Program', token, self.parse_Program, node)
 
@@ -76,7 +85,9 @@ class TransitionDiagram:
         # Declaration-initial ->  Type-specifier ID
         if self.is_in_first('Type-specifier', token):
             self.parsing_stack.append(('ID', node))
+            self.parsing_stack.append('#create_symbol')
             self.parsing_stack.append((self.parse_Type_specifier, node))
+            self.parsing_stack.append('#save_type')
         else:  # error
             self.handle_error_non_terminal('Declaration-initial', token, self.parse_Declaration_initial, node)
 
@@ -87,6 +98,7 @@ class TransitionDiagram:
         # Declaration-prime -> Fun-declaration-prime
         if self.is_in_first('Fun-declaration-prime', token):
             self.parsing_stack.append((self.parse_Fun_declaration_prime, node))
+            self.parsing_stack.append('#func_start')
         # Declaration-prime -> Var-declaration-prime
         elif self.is_in_first('Var-declaration-prime', token):
             self.parsing_stack.append((self.parse_Var_declaration_prime, node))
@@ -100,11 +112,13 @@ class TransitionDiagram:
         # Var-declaration-prime -> ;
         if token.get_terminal_form() == ';':
             self.parsing_stack.append((';', node))
+            self.parsing_stack.append('#set_kind_to_var')
         # Var-declaration-prime -> [ NUM ] ;
         elif token.get_terminal_form() == '[':
             self.parsing_stack.append((';', node))
             self.parsing_stack.append((']', node))
             self.parsing_stack.append(('NUM', node))
+            self.parsing_stack.append('#set_kind_to_array')
             self.parsing_stack.append(('[', node))
         else:  # error
             self.handle_error_non_terminal('Var-declaration-prime', token, self.parse_Var_declaration_prime, node)
@@ -115,10 +129,14 @@ class TransitionDiagram:
 
         # Fun-declaration-prime ->  ( Params ) Compound-stmt
         if token.get_terminal_form() == '(':
+            self.parsing_stack.append('#delete_scope')
             self.parsing_stack.append((self.parse_Compound_stmt, node))
+            self.parsing_stack.append('#save_stack')
+            self.parsing_stack.append('#save_stack')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Params, node))
             self.parsing_stack.append(('(', node))
+            self.parsing_stack.append('#new_scope')
         else:  # error
             self.handle_error_non_terminal('Fun-declaration-prime', token, self.parse_Fun_declaration_prime, node)
 
@@ -141,10 +159,14 @@ class TransitionDiagram:
 
         # Params -> int ID Param-prime Param-list
         if token.get_terminal_form() == 'int':
+            self.parsing_stack.append('#increase_func_arg')
             self.parsing_stack.append((self.parse_Param_list, node))
             self.parsing_stack.append((self.parse_Param_prime, node))
+            self.parsing_stack.append('#set_kind_to_var')
             self.parsing_stack.append(('ID', node))
+            self.parsing_stack.append('#create_symbol')
             self.parsing_stack.append(('int', node))
+            self.parsing_stack.append('#save_type')
         # Params -> void
         elif token.get_terminal_form() == 'void':
             self.parsing_stack.append(('void', node))
@@ -160,6 +182,7 @@ class TransitionDiagram:
             self.parsing_stack.append((self.parse_Param_list, node))
             self.parsing_stack.append((self.parse_Param, node))
             self.parsing_stack.append((',', node))
+            self.parsing_stack.append('#increase_func_arg')
         # Param-list -> EPSILON
         elif token.get_terminal_form() in self.grammar['Param-list']['Follow']:
             Node("epsilon", parent=node)
@@ -672,6 +695,7 @@ class TransitionDiagram:
         if self.current_token.get_terminal_form() == terminal:
             Node(self.current_token, parent=node)
             self.current_token = None
+            self.get_terminal()
         else:
             if not self.parsing_EOF:
                 self.errors.append(f'#{self.current_token.line} : syntax error, missing {terminal}')

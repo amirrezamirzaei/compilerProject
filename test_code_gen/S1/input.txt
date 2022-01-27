@@ -1,22 +1,19 @@
-/*===== Sample 1 =====*/
-int a;
+/*===== sample S1 =====*/
 int foo(int x){
-	int a;
-	int b;
-	int c;
 	if (x < 0){
 		output(x);
 		return 1;
 	}
 	else {
 		output(x);
-		return x + 2;
+		return x + c;
 	} endif
 }
 void main(void){
 	int i;
-	i= foo(0);
+	int a[10];	
+	i= foo(0,1);
 	output(i);
-	i=foo(10);
+	i=foo(a);
 	output(i);
 }
