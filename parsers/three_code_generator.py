@@ -111,7 +111,10 @@ class ThreeCodeGenerator:
             self.jpf_save_if()
         elif action_symbol == '#jp_if':
             self.jp_if()
-
+        elif action_symbol == '#repeat_start':
+            self.repeat_start()
+        elif action_symbol == '#until':
+            self.until()
         else:
             print(action_symbol)
             2 / 0
@@ -261,6 +264,19 @@ class ThreeCodeGenerator:
         line = self.semantic_stack.pop()
         self.add_code_to_program_block('JP', arg1=self.i, line=line, debug='#jp_if')
 
+    def repeat_start(self):
+        self.repeat_stack.append(self.i)
+
+    def until(self):
+        exp, type = self.semantic_stack.pop()
+        line = self.repeat_stack.pop()
+        if type == 'indirect':
+            exp = f'@{exp}'
+        self.add_code_to_program_block('JPF', arg1=exp, arg2=line, debug='#until')
+
+        for break_line in self.break_stack:
+            self.add_code_to_program_block('JP', arg1=self.i, line=break_line)
+        self.break_stack = []
 
 
     def pid(self, current_token):

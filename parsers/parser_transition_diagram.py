@@ -321,14 +321,14 @@ class TransitionDiagram:
     def parse_Iteration_stmt(self, node):
         token = self.get_terminal()
         node = Node("Iteration-stmt", parent=node)
-
-        # Iteration-stmt -> repeat Statement until ( Expression )
         if token.get_terminal_form() == 'repeat':
+            self.parsing_stack.append('#until')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append(('(', node))
             self.parsing_stack.append(('until', node))
             self.parsing_stack.append((self.parse_Statement, node))
+            self.parsing_stack.append('#repeat_start')
             self.parsing_stack.append(('repeat', node))
         else:  # error
             self.handle_error_non_terminal('Iteration-stmt', token, self.parse_Iteration_stmt, node)
