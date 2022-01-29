@@ -1,0 +1,84 @@
+Program -> #begin Declaration-list $ #end
+Declaration-list -> Declaration Declaration-list
+Declaration-list -> EPSILON
+Declaration -> Declaration-initial Declaration-prime
+Declaration-initial ->  #push Type-specifier #create_symbol ID
+Declaration-prime -> #func_start Fun-declaration-prime
+Declaration-prime -> Var-declaration-prime
+Var-declaration-prime -> ; #set_kind_to_var
+Var-declaration-prime -> [ #set_kind_to_array NUM ] ;
+Fun-declaration-prime ->  #new_scope ( Params ) #function_start_space Compound-stmt #end_func_scope
+Type-specifier -> int
+Type-specifier -> void
+Params -> #push int #create_symbol ID #set_kind_to_var Param-prime Param-list #increase_func_arg
+Params -> void
+Param-list -> #increase_func_arg, Param Param-list
+Param-list -> EPSILON
+Param -> Declaration-initial #set_kind_to_var Param-prime
+Param-prime -> [ #set_kind_to_reference ]
+Param-prime -> EPSILON
+Compound-stmt -> { Declaration-list Statement-list }
+Statement-list -> Statement Statement-list
+Statement-list -> EPSILON
+Statement -> Expression-stmt
+Statement -> Compound-stmt
+Statement -> Selection-stmt
+Statement -> Iteration-stmt
+Statement -> Return-stmt
+Expression-stmt -> Expression ; #pop_semantic_stack
+Expression-stmt -> break #break_repeat ;
+Expression-stmt -> ;
+
+
+Selection-stmt -> if ( Expression ) #save Statement #save  Else-stmt
+Else-stmt -> endif #jpf_if
+Else-stmt -> else #jpf_save_if Statement endif #jp_if
+
+
+
+
+Iteration-stmt -> repeat Statement until ( Expression )
+Return-stmt -> return Return-stmt-prime
+Return-stmt-prime -> ;
+Return-stmt-prime -> Expression ;
+Expression -> Simple-expression-zegond
+Expression -> #pid ID B
+B -> = Expression #assign
+B -> [ Expression ] H
+B -> Simple-expression-prime
+H -> = Expression
+H -> G D C
+Simple-expression-zegond -> Additive-expression-zegond C
+Simple-expression-prime -> Additive-expression-prime C
+C -> Relop Additive-expression #operation
+C -> EPSILON
+Relop -> #push <
+Relop -> #push ==
+Additive-expression -> Term D
+Additive-expression-prime -> Term-prime D
+Additive-expression-zegond -> Term-zegond D
+D -> Addop Term #operation D
+D -> EPSILON
+Addop ->  #push +
+Addop -> #push -
+Term -> Factor G
+Term-prime -> Factor-prime G
+Term-zegond -> Factor-zegond G
+G -> * Factor G
+G -> EPSILON
+Factor -> ( Expression )
+Factor -> ID Var-call-prime
+Factor -> #save_num NUM
+Var-call-prime -> ( Args )
+Var-call-prime ->  Var-prime
+Var-prime -> [ Expression ]
+Var-prime -> EPSILON
+Factor-prime -> ( Args )
+Factor-prime -> EPSILON
+Factor-zegond -> ( Expression )
+Factor-zegond -> #save_num NUM
+Args -> Arg-list
+Args -> EPSILON
+Arg-list -> Expression Arg-list-prime
+Arg-list-prime -> , Expression Arg-list-prime
+Arg-list-prime -> EPSILON

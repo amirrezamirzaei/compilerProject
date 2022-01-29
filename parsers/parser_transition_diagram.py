@@ -9,9 +9,8 @@ from scanner.const import TokenType
 def parse_transition_diagram():
     t = TransitionDiagram(Reader('input.txt'), ScannerResult())
     tree, errors = t.parse()
-    # for symbol in t.Gen.SymbolTable.symbol_table:
-    #     print(symbol)
-    # print(t.Gen.SymbolTable.symbol_stack)
+    for symbol in t.Gen.SymbolTable.symbol_table:
+        print(symbol)
     return tree, errors, t.Gen.program_block, t.Gen.semantic_errors
 
 
@@ -47,6 +46,7 @@ class TransitionDiagram:
         # Program -> Declaration-list $
 
         if self.is_in_first('Declaration-list', token):
+            self.parsing_stack.append('#end')
             self.parsing_stack.append(('$', node))
             self.parsing_stack.append((self.parse_Declaration_list, node))
             self.parsing_stack.append('#begin')  # gen
@@ -87,7 +87,7 @@ class TransitionDiagram:
             self.parsing_stack.append(('ID', node))
             self.parsing_stack.append('#create_symbol')
             self.parsing_stack.append((self.parse_Type_specifier, node))
-            self.parsing_stack.append('#save_type')
+            self.parsing_stack.append('#push')
         else:  # error
             self.handle_error_non_terminal('Declaration-initial', token, self.parse_Declaration_initial, node)
 
@@ -129,10 +129,9 @@ class TransitionDiagram:
 
         # Fun-declaration-prime ->  ( Params ) Compound-stmt
         if token.get_terminal_form() == '(':
-            self.parsing_stack.append('#delete_scope')
+            self.parsing_stack.append('#end_func_scope')
             self.parsing_stack.append((self.parse_Compound_stmt, node))
-            self.parsing_stack.append('#save_stack')
-            self.parsing_stack.append('#save_stack')
+            self.parsing_stack.append('#function_start_space')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Params, node))
             self.parsing_stack.append(('(', node))
@@ -166,7 +165,7 @@ class TransitionDiagram:
             self.parsing_stack.append(('ID', node))
             self.parsing_stack.append('#create_symbol')
             self.parsing_stack.append(('int', node))
-            self.parsing_stack.append('#save_type')
+            self.parsing_stack.append('#push')
         # Params -> void
         elif token.get_terminal_form() == 'void':
             self.parsing_stack.append(('void', node))
@@ -196,6 +195,7 @@ class TransitionDiagram:
         # Param -> Declaration-initial Param-prime
         if self.is_in_first('Declaration-initial', token):
             self.parsing_stack.append((self.parse_Param_prime, node))
+            self.parsing_stack.append('#set_kind_to_var')
             self.parsing_stack.append((self.parse_Declaration_initial, node))
         else:  # error
             self.handle_error_non_terminal('Param', token, self.parse_Param, node)
@@ -207,6 +207,7 @@ class TransitionDiagram:
         # Param-prime -> [  ]
         if token.get_terminal_form() == '[':
             self.parsing_stack.append((']', node))
+            self.parsing_stack.append('#set_kind_to_reference')
             self.parsing_stack.append(('[', node))
         # Param-prime -> EPSILON
         elif token.get_terminal_form() in self.grammar['Param-prime']['Follow']:
@@ -269,11 +270,13 @@ class TransitionDiagram:
 
         # Expression-stmt -> Expression ;
         if self.is_in_first('Expression', token):
+            self.parsing_stack.append('#pop_semantic_stack')
             self.parsing_stack.append((';', node))
             self.parsing_stack.append((self.parse_Expression, node))
         # Expression-stmt -> break ;
         elif token.get_terminal_form() == 'break':
             self.parsing_stack.append((';', node))
+            self.parsing_stack.append('#break_repeat')
             self.parsing_stack.append(('break', node))
         #  Expression-stmt -> ;
         elif token.get_terminal_form() == ';':
@@ -289,6 +292,7 @@ class TransitionDiagram:
         if token.get_terminal_form() == 'if':
             self.parsing_stack.append((self.parse_Else_stmt, node))
             self.parsing_stack.append((self.parse_Statement, node))
+            self.parsing_stack.append('#save')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append(('(', node))
@@ -302,11 +306,14 @@ class TransitionDiagram:
 
         # Else-stmt -> endif
         if token.get_terminal_form() == 'endif':
+            self.parsing_stack.append('#jpf_if')
             self.parsing_stack.append(('endif', node))
         #  Else-stmt -> else Statement endif
         elif token.get_terminal_form() == 'else':
             self.parsing_stack.append(('endif', node))
+            self.parsing_stack.append('#jp_if')
             self.parsing_stack.append((self.parse_Statement, node))
+            self.parsing_stack.append('#jpf_save_if')
             self.parsing_stack.append(('else', node))
         else:  # error
             self.handle_error_non_terminal('Else-stmt', token, self.parse_Else_stmt, node)
@@ -362,6 +369,7 @@ class TransitionDiagram:
         elif token.get_terminal_form() == 'ID':
             self.parsing_stack.append((self.parse_B, node))
             self.parsing_stack.append(('ID', node))
+            self.parsing_stack.append('#pid')
         else:  # error
             self.handle_error_non_terminal('Expression', token, self.parse_Expression, node)
 
@@ -371,6 +379,7 @@ class TransitionDiagram:
 
         # B -> = Expression
         if token.get_terminal_form() == '=':
+            self.parsing_stack.append('#assign')
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append(('=', node))
         # B -> [ Expression ] H
@@ -429,6 +438,7 @@ class TransitionDiagram:
 
         # C -> Relop Additive-expression
         if self.is_in_first('Relop', token):
+            self.parsing_stack.append('#operation')
             self.parsing_stack.append((self.parse_Additive_expression, node))
             self.parsing_stack.append((self.parse_Relop, node))
         # C -> EPSILON
@@ -444,9 +454,11 @@ class TransitionDiagram:
         # Relop -> <
         if token.get_terminal_form() == '<':
             self.parsing_stack.append(('<', node))
+            self.parsing_stack.append('#push')
         # Relop -> ==
         elif token.get_terminal_form() == '==':
             self.parsing_stack.append(('==', node))
+            self.parsing_stack.append('#push')
         else:  # error
             self.handle_error_non_terminal('Relop', token, self.parse_Relop, node)
 
@@ -492,6 +504,7 @@ class TransitionDiagram:
         # D -> Addop Term D
         if self.is_in_first('Addop', token):
             self.parsing_stack.append((self.parse_D, node))
+            self.parsing_stack.append('#operation')
             self.parsing_stack.append((self.parse_Term, node))
             self.parsing_stack.append((self.parse_Addop, node))
         # D -> EPSILON
@@ -507,9 +520,11 @@ class TransitionDiagram:
         # Addop -> +
         if token.get_terminal_form() == '+':
             self.parsing_stack.append(('+', node))
+            self.parsing_stack.append('#push')
         # Addop -> -
         elif token.get_terminal_form() == '-':
             self.parsing_stack.append(('-', node))
+            self.parsing_stack.append('#push')
         else:  # error
             self.handle_error_non_terminal('Addop', token, self.parse_Addop, node)
 
@@ -577,6 +592,7 @@ class TransitionDiagram:
         # Factor -> NUM
         elif token.get_terminal_form() == 'NUM':
             self.parsing_stack.append(('NUM', node))
+            self.parsing_stack.append('#save_num')
         else:  # error
             self.handle_error_non_terminal('Factor', token, self.parse_Factor, node)
 
@@ -637,6 +653,7 @@ class TransitionDiagram:
         # Factor-zegond -> NUM
         elif token.get_terminal_form() == 'NUM':
             self.parsing_stack.append(('NUM', node))
+            self.parsing_stack.append('#save_num')
         else:  # error
             self.handle_error_non_terminal('Factor-zegond', token, self.parse_Factor_zegond, node)
 

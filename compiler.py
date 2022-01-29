@@ -1,8 +1,17 @@
 # Amirreza Mirzaei 98106112         Arman Soleimani 98105835
+from anytree import RenderTree
+
 from parsers.parser_transition_diagram import parse_transition_diagram
 
 
-def write_to_file(code, errors):
+def write_to_file(code, errors, tree):
+    tree_str = ''
+    for pre, fill, node in RenderTree(tree):
+        tree_str += "%s%s" % (pre, node.name) + '\n'
+    f = open("parse_Tree.txt", "w", encoding='utf-8')
+    f.write(tree_str.strip())
+    f.close()
+
     if semantic_errors:
         string_to_write = ''
         for error in semantic_errors:
@@ -30,4 +39,4 @@ def write_to_file(code, errors):
 
 
 tree, parse_errors, three_address_code, semantic_errors = parse_transition_diagram()
-write_to_file(three_address_code, semantic_errors)
+write_to_file(three_address_code, semantic_errors, tree)
