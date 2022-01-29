@@ -32,23 +32,15 @@ Selection-stmt -> if ( Expression ) #save Statement #save  Else-stmt
 Else-stmt -> endif #jpf_if
 Else-stmt -> else #jpf_save_if Statement endif #jp_if
 Iteration-stmt -> repeat #repeat_start Statement until ( Expression ) #until
-
-
-
-
 Return-stmt -> return Return-stmt-prime
-Return-stmt-prime -> ;
-Return-stmt-prime -> Expression ;
-
-
+Return-stmt-prime -> ; #return_void
+Return-stmt-prime -> Expression ; #return_exp
 Expression -> Simple-expression-zegond
 Expression -> #pid ID B
-
-
 B -> = Expression #assign
-B -> [ Expression ] H
+B -> [ Expression #get_array_cell_address] H
 B -> Simple-expression-prime
-H -> = Expression
+H -> = Expression #assign
 H -> G D C
 Simple-expression-zegond -> Additive-expression-zegond C
 Simple-expression-prime -> Additive-expression-prime C
@@ -66,11 +58,13 @@ Addop -> #push -
 Term -> Factor G
 Term-prime -> Factor-prime G
 Term-zegond -> Factor-zegond G
-G -> * Factor G
+G -> * Factor #multiply G
 G -> EPSILON
 Factor -> ( Expression )
-Factor -> ID Var-call-prime
+Factor -> #pid ID Var-call-prime
 Factor -> #save_num NUM
+
+
 Var-call-prime -> ( Args )
 Var-call-prime ->  Var-prime
 Var-prime -> [ Expression ]

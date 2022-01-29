@@ -350,9 +350,11 @@ class TransitionDiagram:
 
         # Return-stmt-prime -> ;
         if token.get_terminal_form() == ';':
+            self.parsing_stack.append('#return_void')
             self.parsing_stack.append((';', node))
         # Return-stmt-prime -> Expression ;
         elif self.is_in_first('Expression', token):
+            self.parsing_stack.append('#return_exp')
             self.parsing_stack.append((';', node))
             self.parsing_stack.append((self.parse_Expression, node))
         else:  # error
@@ -386,6 +388,7 @@ class TransitionDiagram:
         elif token.get_terminal_form() == '[':
             self.parsing_stack.append((self.parse_H, node))
             self.parsing_stack.append((']', node))
+            self.parsing_stack.append('#get_array_cell_address')
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append(('[', node))
         # B -> Simple-expression-prime
@@ -400,6 +403,7 @@ class TransitionDiagram:
 
         # H -> = Expression
         if token.get_terminal_form() == '=':
+            self.parsing_stack.append('#assign')
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append(('=', node))
         # H -> G D C
@@ -568,6 +572,7 @@ class TransitionDiagram:
         # G -> * Factor G
         if token.get_terminal_form() == '*':
             self.parsing_stack.append((self.parse_G, node))
+            self.parsing_stack.append('#multiply')
             self.parsing_stack.append((self.parse_Factor, node))
             self.parsing_stack.append(('*', node))
         # G -> EPSILON
@@ -589,6 +594,7 @@ class TransitionDiagram:
         elif token.get_terminal_form() == 'ID':
             self.parsing_stack.append((self.parse_Var_call_prime, node))
             self.parsing_stack.append(('ID', node))
+            self.parsing_stack.append('#pid')
         # Factor -> NUM
         elif token.get_terminal_form() == 'NUM':
             self.parsing_stack.append(('NUM', node))

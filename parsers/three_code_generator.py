@@ -1,3 +1,5 @@
+DEBUG = False
+
 class Symbol:
     def __init__(self, name, kind=None, args_count=None, type=None, scope=None, address=None):
         self.name = name
@@ -47,7 +49,7 @@ class SymbolTable:
 
 
 class ThreeCodeGenerator:
-    RETURN_VALUE_ADDRESS = 6000
+    RETURN_REGISTER = 6000
     STACK_POINTER_ADDRESS = 6004
 
     STACK_START_ADDRESS = 5000
@@ -64,6 +66,7 @@ class ThreeCodeGenerator:
         self.function_address = []
         self.repeat_stack = []
         self.break_stack = []
+        self.main_return_stack = []
         self.SymbolTable = SymbolTable()
 
     def semantic_action(self, action_symbol, current_token):
@@ -101,6 +104,8 @@ class ThreeCodeGenerator:
             self.save_num(current_token)
         elif action_symbol == '#operation':
             self.operation()
+        elif action_symbol == '#multiply':
+            self.operation(mult=True)
         elif action_symbol == '#break_repeat':
             self.break_repeat(current_token)
         elif action_symbol == '#save':
@@ -115,6 +120,12 @@ class ThreeCodeGenerator:
             self.repeat_start()
         elif action_symbol == '#until':
             self.until()
+        elif action_symbol == '#return_void':
+            self.return_void()
+        elif action_symbol == '#return_exp':
+            self.return_exp()
+        elif action_symbol == '#get_array_cell_address':
+            self.get_array_cell_address()
         else:
             print(action_symbol)
             2 / 0
@@ -128,10 +139,12 @@ class ThreeCodeGenerator:
         self.semantic_stack.append(p)
 
     def add_code_to_program_block(self, command, arg1, arg2='', arg3='', line=None, debug=''):
+        if not DEBUG:
+            debug = ''
         if line:
-            self.program_block[line - 1] = f'{line}   ({command}, {arg1}, {arg2}, {arg3}) {debug}'
+            self.program_block[line - 1] = f'{line}   ({command}, {arg1}, {arg2}, {arg3}){debug}'
         else:
-            self.program_block.append(f'{self.i}   ({command}, {arg1}, {arg2}, {arg3})  {debug}')
+            self.program_block.append(f'{self.i}   ({command}, {arg1}, {arg2}, {arg3}){debug}')
             self.i += 1
 
     def save(self):
@@ -139,7 +152,7 @@ class ThreeCodeGenerator:
         self.add_code_to_program_block('', '', debug='#save')
 
     def begin(self):
-        self.add_code_to_program_block('ASSIGN', arg1='#1', arg2=self.RETURN_VALUE_ADDRESS, debug='#begin')
+        self.add_code_to_program_block('ASSIGN', arg1='#1', arg2=self.RETURN_REGISTER, debug='#begin')
         self.add_code_to_program_block('ASSIGN', arg1=f'#{self.STACK_START_ADDRESS}', arg2=self.STACK_POINTER_ADDRESS,
                                        debug='#begin')
 
@@ -192,16 +205,6 @@ class ThreeCodeGenerator:
             self.semantic_errors.append(
                 f"#{current_token.line}: Semantic Error! Illegal type of void for '{symbol.name}'")
 
-    @staticmethod
-    def check_bad_exp_type(exp_type):
-        if "array" in exp_type:
-            return 'Type mismatch in operands, Got array instead of int.'
-        if "void_func_output" in exp_type:
-            return 'void type function has no output.'
-        if "function" in exp_type:
-            return 'Type mismatch in operands. Got function instead of int.'
-        return None
-
     def new_scope(self):
         self.SymbolTable.new_scope()
 
@@ -221,8 +224,10 @@ class ThreeCodeGenerator:
 
     def end(self):
         # todo remove after debug
-        self.add_code_to_program_block('END', arg1=None, debug='#END')
-        print('end')
+        for line in self.main_return_stack:
+            self.add_code_to_program_block('JP', arg1=self.i, line=line, debug='#return')
+        self.main_return_stack = []
+        self.add_code_to_program_block('ASSIGN', arg1='6000', arg2='6000', debug='#END')
         print(self.semantic_stack)
 
     def function_start_space(self):
@@ -256,7 +261,7 @@ class ThreeCodeGenerator:
         exp, type = self.semantic_stack.pop()
         if type == 'indirect':
             exp = f'@{exp}'
-        self.add_code_to_program_block('JPF', arg1=exp, arg2=self.i+1, line=line, debug='#jpf_save_if')
+        self.add_code_to_program_block('JPF', arg1=exp, arg2=self.i + 1, line=line, debug='#jpf_save_if')
         self.semantic_stack.append(self.i)
         self.save()
 
@@ -278,9 +283,33 @@ class ThreeCodeGenerator:
             self.add_code_to_program_block('JP', arg1=self.i, line=break_line)
         self.break_stack = []
 
+    def return_void(self):
+        func = self.SymbolTable.get_last_function()
+        if func.name == 'main':
+            self.main_return_stack.append(self.i)
+            self.add_code_to_program_block('', '')
+        else:
+            offset = -self.STACK_BLOCK_SIZE + func.args_count * 4
+            t = self.get_temp_address()
+            self.add_code_to_program_block('ASSIGN', arg1=self.STACK_POINTER_ADDRESS, arg2=t, debug='#return_void')
+            self.add_code_to_program_block('ADD', arg1=t, arg2=f'#{offset}', arg3=t, debug='#return_void')
+            self.add_code_to_program_block('ASSIGN', arg1=f'@{t}', arg2=t, debug='#return_void')
+            self.add_code_to_program_block('JP', arg1=f'@{t}', debug='#return_void')
+
+    def return_exp(self):
+        arg, type = self.semantic_stack.pop()
+        if type == 'indirect':
+            arg = f'@{arg}'
+        func = self.SymbolTable.get_last_function()
+        self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=self.RETURN_REGISTER, debug='#setting_return_value')
+        offset = -self.STACK_BLOCK_SIZE + func.args_count * 4
+        t = self.get_temp_address()
+        self.add_code_to_program_block('ASSIGN', arg1=self.STACK_POINTER_ADDRESS, arg2=t, debug='#return_void')
+        self.add_code_to_program_block('ADD', arg1=t, arg2=f'#{offset}', arg3=t, debug='#return_void')
+        self.add_code_to_program_block('ASSIGN', arg1=f'@{t}', arg2=t, debug='#return_void')
+        self.add_code_to_program_block('JP', arg1=f'@{t}', debug='#return_void')
 
     def pid(self, current_token):
-
         if current_token.content == 'output':
             self.push('output')
         else:
@@ -300,25 +329,39 @@ class ThreeCodeGenerator:
                 f"#{current_token.line}: Semantic Error! '{current_token.content}' is not defined'")
 
     def assign(self, current_token):
+        print('assign', self.semantic_stack)
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
-        self.push((arg2, type2))
+        # self.push((arg2, type2)) todo check this
         if type1 == 'indirect':
             arg1 = f'@{arg1}'
         if type2 == 'indirect':
             arg2 = f'@{arg2}'
         self.add_code_to_program_block('ASSIGN', arg1=arg1, arg2=arg2, debug='#assign')
+        self.push((arg2.replace('@',''), type2))
+
+    def get_array_cell_address(self):
+        arg1, type1 = self.semantic_stack.pop()
+        arg2, type2 = self.semantic_stack.pop()
+        if type1 == 'indirect':
+            arg1 = f'@{arg1}'
+        t = self.get_temp_address()
+        self.add_code_to_program_block('MULT', arg1=arg1, arg2='#4', arg3=t, debug='#array_cell')
+        self.add_code_to_program_block('ADD', arg1=arg2, arg2=t, arg3=t, debug='#array_cell')
+        self.push((t, 'indirect'))
 
     def save_num(self, current_token):
         t = self.get_temp_address()
         self.add_code_to_program_block('ASSIGN', arg1=f'#{current_token.content}', arg2=t, debug='#save_num')
         self.push((t, 'direct'))
 
-    def operation(self):
+    def operation(self, mult=False):
         arg1, type1 = self.semantic_stack.pop()
-        op = self.semantic_stack.pop()
+        op = '*' if mult else self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
-        if op == '+':
+        if op == '*':
+            op = 'MULT'
+        elif op == '+':
             op = 'ADD'
         elif op == '-':
             op = 'SUB'
