@@ -1,5 +1,6 @@
 DEBUG = False
 
+
 class Symbol:
     def __init__(self, name, kind=None, args_count=None, type=None, scope=None, address=None):
         self.name = name
@@ -67,6 +68,7 @@ class ThreeCodeGenerator:
         self.repeat_stack = []
         self.break_stack = []
         self.main_return_stack = []
+        self.arg_stack = []
         self.SymbolTable = SymbolTable()
 
     def semantic_action(self, action_symbol, current_token):
@@ -126,6 +128,8 @@ class ThreeCodeGenerator:
             self.return_exp()
         elif action_symbol == '#get_array_cell_address':
             self.get_array_cell_address()
+        elif action_symbol == '#tmp_out':
+            self.tmp_out()
         else:
             print(action_symbol)
             2 / 0
@@ -142,9 +146,9 @@ class ThreeCodeGenerator:
         if not DEBUG:
             debug = ''
         if line:
-            self.program_block[line - 1] = f'{line}   ({command}, {arg1}, {arg2}, {arg3}){debug}'
+            self.program_block[line - 1] = f'{line}\t({command}, {arg1}, {arg2}, {arg3}){debug}'
         else:
-            self.program_block.append(f'{self.i}   ({command}, {arg1}, {arg2}, {arg3}){debug}')
+            self.program_block.append(f'{self.i}\t({command}, {arg1}, {arg2}, {arg3}){debug}')
             self.i += 1
 
     def save(self):
@@ -332,13 +336,12 @@ class ThreeCodeGenerator:
         print('assign', self.semantic_stack)
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
-        # self.push((arg2, type2)) todo check this
         if type1 == 'indirect':
             arg1 = f'@{arg1}'
         if type2 == 'indirect':
             arg2 = f'@{arg2}'
         self.add_code_to_program_block('ASSIGN', arg1=arg1, arg2=arg2, debug='#assign')
-        self.push((arg2.replace('@',''), type2))
+        self.push((arg2.replace('@', ''), type2))
 
     def get_array_cell_address(self):
         arg1, type1 = self.semantic_stack.pop()
@@ -365,10 +368,12 @@ class ThreeCodeGenerator:
             op = 'ADD'
         elif op == '-':
             op = 'SUB'
+            arg1, type1, arg2, type2 = arg2, type2, arg1, type1
         elif op == '==':
             op = 'EQ'
         elif op == '<':
             op = 'LT'
+            arg1, type1, arg2, type2 = arg2, type2, arg1, type1
         if type1 == 'indirect':
             arg1 = f'@{arg1}'
         if type2 == 'indirect':
@@ -376,3 +381,11 @@ class ThreeCodeGenerator:
         t = self.get_temp_address()
         self.add_code_to_program_block(op, arg1=arg1, arg2=arg2, arg3=t)
         self.push((t, 'direct'))
+
+    def tmp_out(self):
+        arg, type = self.semantic_stack.pop()
+        if type == 'indirect':
+            arg = f'@{arg}'
+        self.semantic_stack.pop()
+        self.add_code_to_program_block('PRINT', arg1=arg)
+        self.push('fake token')

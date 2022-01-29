@@ -608,6 +608,7 @@ class TransitionDiagram:
 
         # Var-call-prime -> ( Args )
         if token.get_terminal_form() == '(':
+            self.parsing_stack.append('#tmp_out')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Args, node))
             self.parsing_stack.append(('(', node))
@@ -638,6 +639,7 @@ class TransitionDiagram:
 
         # Factor-prime -> ( Args )
         if token.get_terminal_form() == '(':
+            self.parsing_stack.append('#tmp_out')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Args, node))
             self.parsing_stack.append(('(', node))

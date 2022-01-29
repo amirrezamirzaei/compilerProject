@@ -63,18 +63,19 @@ G -> EPSILON
 Factor -> ( Expression )
 Factor -> #pid ID Var-call-prime
 Factor -> #save_num NUM
-
-
-Var-call-prime -> ( Args )
-Var-call-prime ->  Var-prime
-Var-prime -> [ Expression ]
-Var-prime -> EPSILON
-Factor-prime -> ( Args )
-Factor-prime -> EPSILON
 Factor-zegond -> ( Expression )
 Factor-zegond -> #save_num NUM
 Args -> Arg-list
 Args -> EPSILON
 Arg-list -> Expression Arg-list-prime
+Var-call-prime ->  Var-prime
+
+
+
+Var-call-prime -> ( Args ) #tmp_out
+Var-prime -> [ Expression ]
+Var-prime -> EPSILON
+Factor-prime -> ( Args ) tmp_out
+Factor-prime -> EPSILON
 Arg-list-prime -> , Expression Arg-list-prime
 Arg-list-prime -> EPSILON
