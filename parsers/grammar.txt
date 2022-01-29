@@ -17,17 +17,18 @@ Params -> void
 Param-list -> #increase_func_arg, Param Param-list | EPSILON
 Param-list -> EPSILON
 
+Param -> Declaration-initial #set_kind_to_var Param-prime
 
-
-Param -> Declaration-initial Param-prime
+??
 Param-prime -> [  ] | EPSILON
-
 Compound-stmt -> { Declaration-list Statement-list }
+
 Statement-list -> Statement Statement-list | EPSILON
 Statement -> Expression-stmt | Compound-stmt | Selection-stmt | Iteration-stmt | Return-stmt
-Expression-stmt -> Expression ; | break ; | ;
-Selection-stmt -> if ( Expression ) Statement Else-stmt
-Else-stmt -> endif | else Statement endif
+Expression-stmt -> Expression ; #pop_semantic_stack | break ; #loop_break_jump | ;
+Selection-stmt -> if ( Expression ) #save Statement #save #backpatch_if Else-stmt
+Else-stmt -> endif #finish_if | else Statement #backpatch_else endif
+
 Iteration-stmt -> repeat Statement until ( Expression )
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> ; | Expression ;

@@ -42,6 +42,11 @@ class SymbolTable:
         for symbol in reversed(self.symbol_table):
             if symbol.kind == 'function':
                 return symbol
+    
+    def get_last_var(self):
+        for symbol in reversed(self.symbol_table):
+            if symbol.kind == 'var':
+                return symbol
 
 
 class ThreeCodeGenerator:
@@ -81,6 +86,17 @@ class ThreeCodeGenerator:
             self.delete_scope()
         elif action_symbol == '#increase_func_arg':
             self.increase_func_arg()
+        elif action_symbol == '#pop_semantic_stack':
+            self.pop_semantic_stack()
+        elif action_symbol == '#loop_break_jump':
+            self.loop_break_jump()
+        elif action_symbol == '#backpatch_if':
+            self.backpatch_if()
+        elif action_symbol == '#backpatch_else':
+            self.backpatch_else()
+        elif action_symbol == '#finish_if':
+            self.finish_if()
+        
         else:
             print(action_symbol)
             2/0
@@ -90,9 +106,9 @@ class ThreeCodeGenerator:
 
     def add_code_to_program_block(self, command, arg1, arg2='', arg3='', line=None):
         if line:
-            self.program_block[line-1] = f'({line}   {command}, {arg1}, {arg2}, {arg3})'
+            self.program_block[line-1] = f'{line}   ({command}, {arg1}, {arg2}, {arg3})'
         else:
-            self.program_block.append(f'({self.i}   {command}, {arg1}, {arg2}, {arg3})')
+            self.program_block.append(f'{self.i}   ({command}, {arg1}, {arg2}, {arg3})')
             self.i += 1
 
     def save(self):
@@ -143,6 +159,16 @@ class ThreeCodeGenerator:
 
         symbol.address = self.SymbolTable.stack_pointer[-1]
         self.SymbolTable.stack_pointer[-1] += array_size * 4
+    
+    @staticmethod
+    def check_bad_exp_type(exp_type):
+        if "array" in exp_type:
+            return 'Type mismatch in operands, Got array instead of int.'
+        if "void_func_output" in exp_type:
+            return 'void type function has no output.'
+        if "function" in exp_type:
+            return 'Type mismatch in operands. Got function instead of int.'
+        return None
 
     def new_scope(self):
         self.SymbolTable.new_scope()
@@ -156,4 +182,37 @@ class ThreeCodeGenerator:
     def increase_func_arg(self):
         last_function = self.SymbolTable.get_last_function()
         last_function.args_count += 1
+    
+    def pop_semantic_stack(self):
+        self.semantic_stack.pop()
+    
+    def loop_break_jump(self):
+        temp = self.semantic_stack[-2] # -2 ya -1 ???
+        self.add_code_to_program_block('JP', '@{}'.format(temp))
+    
+    def backpatch_if(self):
+        #avalesh ye semantic error check lazem darim
+
+        backpatch = self.semantic_stack[-2]
+        exp_adr = self.semantic_stack[-3]
+
+        self.program_block[backpatch] = "{}   (JPF, {}{}, {})".format(
+            # ina ye stacke joda daran ke tosh type negah midare baraye semantic check
+            backpatch + 1,
+            "@" if "indirect" in exp_type else "",
+            exp_adr,
+            self.i
+        )
+    
+    def backpatch_else(self):
+        backpatch = self.semantic_stack[-1]
+        self.program_block[backpatch] = "{}   (JP, {})".format(backpatch + 1, self.i)
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+    
+    def finish_if(self):
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
+        self.semantic_stack.pop()
 
