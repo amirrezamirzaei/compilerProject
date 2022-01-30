@@ -29,10 +29,6 @@ def write_to_file(code, errors, tree):
         f.write(string_to_write.strip())
         f.close()
 
-        f = open("expected.txt", "w")
-        f.write('will be added.')
-        f.close()
-
         f = open("semantic_errors.txt", "w")
         f.write('The input program is semantically correct.')
         f.close()

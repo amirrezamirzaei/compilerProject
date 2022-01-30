@@ -1,6 +1,6 @@
 import json
 
-from parsers.three_code_generator import ThreeCodeGenerator
+from parsers.code_generator import ThreeCodeGenerator
 from scanner import Reader, ScannerResult, get_next_token
 from anytree import Node
 from scanner.const import TokenType
@@ -131,7 +131,6 @@ class TransitionDiagram:
         if token.get_terminal_form() == '(':
             self.parsing_stack.append('#end_func_scope')
             self.parsing_stack.append((self.parse_Compound_stmt, node))
-            self.parsing_stack.append('#function_start_space')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Params, node))
             self.parsing_stack.append(('(', node))
@@ -608,7 +607,6 @@ class TransitionDiagram:
 
         # Var-call-prime -> ( Args )
         if token.get_terminal_form() == '(':
-            self.parsing_stack.append('#tmp_out')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Args, node))
             self.parsing_stack.append(('(', node))
@@ -636,10 +634,8 @@ class TransitionDiagram:
     def parse_Factor_prime(self, node):
         token = self.get_terminal()
         node = Node("Factor-prime", parent=node)
-
         # Factor-prime -> ( Args )
         if token.get_terminal_form() == '(':
-            self.parsing_stack.append('#tmp_out')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Args, node))
             self.parsing_stack.append(('(', node))

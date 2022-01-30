@@ -50,14 +50,11 @@ class SymbolTable:
 
 
 class ThreeCodeGenerator:
-    RETURN_REGISTER = 6000
-    STACK_POINTER_ADDRESS = 6004
-
-    STACK_START_ADDRESS = 5000
-    STACK_END_ADDRESS = 7000
+    RETURN_REGISTER = 3000
+    STACK_POINTER_ADDRESS = 3004
+    STACK_START_ADDRESS = 8000
     STACK_BLOCK_SIZE = 2000
-
-    last_temp_address = 2004
+    last_temp_address = 4000
 
     def __init__(self):
         self.i = 1
@@ -68,6 +65,7 @@ class ThreeCodeGenerator:
         self.repeat_stack = []
         self.break_stack = []
         self.main_return_stack = []
+        self.function_to_run = None
         self.arg_stack = []
         self.SymbolTable = SymbolTable()
 
@@ -128,8 +126,12 @@ class ThreeCodeGenerator:
             self.return_exp()
         elif action_symbol == '#get_array_cell_address':
             self.get_array_cell_address()
-        elif action_symbol == '#tmp_out':
-            self.tmp_out()
+        elif action_symbol == '#save_alive_tmps':
+            self.save_alive_tmps()
+        elif action_symbol == '#run_func':
+            self.run_func()
+        elif action_symbol == '#save_func_for_running':
+            self.save_func_for_running()
         else:
             print(action_symbol)
             2 / 0
@@ -232,7 +234,6 @@ class ThreeCodeGenerator:
             self.add_code_to_program_block('JP', arg1=self.i, line=line, debug='#return')
         self.main_return_stack = []
         self.add_code_to_program_block('ASSIGN', arg1='6000', arg2='6000', debug='#END')
-        print(self.semantic_stack)
 
     def function_start_space(self):
         # setting two space aside for return value and return address
@@ -333,7 +334,6 @@ class ThreeCodeGenerator:
                 f"#{current_token.line}: Semantic Error! '{current_token.content}' is not defined'")
 
     def assign(self, current_token):
-        print('assign', self.semantic_stack)
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
         if type1 == 'indirect':
@@ -341,7 +341,7 @@ class ThreeCodeGenerator:
         if type2 == 'indirect':
             arg2 = f'@{arg2}'
         self.add_code_to_program_block('ASSIGN', arg1=arg1, arg2=arg2, debug='#assign')
-        self.push((arg2.replace('@', ''), type2))
+        self.push((f'{arg2}'.replace('@', ''), type2))
 
     def get_array_cell_address(self):
         arg1, type1 = self.semantic_stack.pop()
@@ -382,10 +382,40 @@ class ThreeCodeGenerator:
         self.add_code_to_program_block(op, arg1=arg1, arg2=arg2, arg3=t)
         self.push((t, 'direct'))
 
-    def tmp_out(self):
+    def save_alive_tmps(self):
+        for tmp in self.semantic_stack:
+            if not isinstance(tmp, tuple):
+                continue
+            arg, type = tmp
+            t = self.get_temp_address()
+            self.add_code_to_program_block('ASSIGN', arg1=self.STACK_POINTER_ADDRESS, arg2=t)
+            self.add_code_to_program_block('SUB', arg1=t, arg2='#-4', arg3=t)
+            self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=f'@{t}')
+
+    def save_func_for_running(self):
+        func_address, _ = self.semantic_stack[-1]
+        for symbol in reversed(self.SymbolTable.symbol_table):
+            if symbol.kind == 'function' and symbol.address == func_address:
+                self.function_to_run = symbol
+                return
+        2 / 0
+
+    def run_func(self):
+        # going to the next stack block
+        self.add_code_to_program_block('ADD', arg1=self.STACK_POINTER_ADDRESS, arg2=self.STACK_BLOCK_SIZE,
+                                       arg3=self.STACK_POINTER_ADDRESS)
+        t = self.get_temp_address()
+        self.add_code_to_program_block('ASSIGN', arg1=self.STACK_POINTER_ADDRESS, arg2=t)
+        self.add_code_to_program_block('ADD', arg1=f'#{self.STACK_BLOCK_SIZE+self.function_to_run.args_count*4}', arg2=t, arg3=t)
+
+
+    def push_arg(self, ct):
+        t = self.get_temp_address()
+        self.add_code("(ASSIGN, {}, {})".format(SymbolTable.STACK_BASE, t))
+        self.add_code("(ADD, {}, #{}, {})".format(t, SymbolTable.STACK_BLOCK_SIZE + self.arg_counter[-1], t))
         arg, type = self.semantic_stack.pop()
-        if type == 'indirect':
-            arg = f'@{arg}'
-        self.semantic_stack.pop()
-        self.add_code_to_program_block('PRINT', arg1=arg)
-        self.push('fake token')
+        self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=f'@{t}')
+
+        self.arg_counter[-1] += 4
+
+        self.func_args_stack[-1].append(arg_type)
