@@ -607,9 +607,11 @@ class TransitionDiagram:
 
         # Var-call-prime -> ( Args )
         if token.get_terminal_form() == '(':
+            self.parsing_stack.append('#call_func')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Args, node))
             self.parsing_stack.append(('(', node))
+            self.parsing_stack.append('#start_function')
         # Var-call-prime -> Var-prime
         elif self.is_in_first('Var-prime', token):
             self.parsing_stack.append((self.parse_Var_prime, node))
@@ -619,10 +621,10 @@ class TransitionDiagram:
     def parse_Var_prime(self, node):
         token = self.get_terminal()
         node = Node("Var-prime", parent=node)
-
         # Var-prime -> [ Expression ]
         if token.get_terminal_form() == '[':
             self.parsing_stack.append((']', node))
+            self.parsing_stack.append('#get_array_cell_address')
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append(('[', node))
         # Var-prime -> EPSILON
@@ -636,9 +638,11 @@ class TransitionDiagram:
         node = Node("Factor-prime", parent=node)
         # Factor-prime -> ( Args )
         if token.get_terminal_form() == '(':
+            self.parsing_stack.append('#call_func')
             self.parsing_stack.append((')', node))
             self.parsing_stack.append((self.parse_Args, node))
             self.parsing_stack.append(('(', node))
+            self.parsing_stack.append('#start_function')
         # Factor-prime -> EPSILON
         elif token.get_terminal_form() in self.grammar['Factor-prime']['Follow']:
             Node("epsilon", parent=node)
@@ -694,9 +698,11 @@ class TransitionDiagram:
             self.parsing_stack.append((self.parse_Arg_list_prime, node))
             self.parsing_stack.append((self.parse_Expression, node))
             self.parsing_stack.append((',', node))
+            self.parsing_stack.append('#add_arg')
         # Arg-list-prime -> EPSILON
         elif token.get_terminal_form() in self.grammar['Arg-list-prime']['Follow']:
             Node("epsilon", parent=node)
+            self.parsing_stack.append('#add_arg')
         else:  # error
             self.handle_error_non_terminal('Arg-list-prime', token, self.parse_Arg_list_prime, node)
 

@@ -66,18 +66,16 @@ Factor -> #save_num NUM
 Var-call-prime -> Var-prime
 
 
-Var-call-prime -> ( Args )
+Var-prime -> [ Expression #get_array_cell_address ]
+Var-call-prime -> #start_function ( Args ) #call_func
+Factor-prime -> #start_function ( Args ) #call_func
 
-
-
-Var-prime -> [ Expression ]
 Var-prime -> EPSILON
-Factor-prime -> ( Args )
 Factor-prime -> EPSILON
 Factor-zegond -> ( Expression )
 Factor-zegond -> #save_num NUM
 Args -> Arg-list
 Args -> EPSILON
 Arg-list -> Expression Arg-list-prime
-Arg-list-prime -> , Expression Arg-list-prime
-Arg-list-prime -> EPSILON
+Arg-list-prime -> #add_arg , Expression Arg-list-prime
+Arg-list-prime -> #add_arg EPSILON
