@@ -23,6 +23,8 @@ class SymbolTable:
         self.data_pointer = 3000
 
     def add(self, name, kind=None, type=None):
+        if name == 'fact':
+            raise ValueError(f'recursive escape')
         symbol = Symbol(name, kind=kind, scope=len(self.symbol_stack), type=type)
         self.symbol_table.append(symbol)
         if kind == 'function':
@@ -32,7 +34,7 @@ class SymbolTable:
         self.symbol_stack.append(len(self.symbol_table))
 
     def delete_scope(self):
-        p = self.symbol_stack.pop()
+        self.symbol_stack.pop()
 
     def get_last_function(self):
         for symbol in reversed(self.symbol_table):
@@ -44,15 +46,16 @@ class SymbolTable:
             if symbol.kind == 'var':
                 return symbol
 
-    def get_function_args(self, func_name):
+    def get_function_args(self, func_symbol):
         args = []
         for symbol in reversed(self.symbol_table):
-            if symbol.name == func_name and symbol.kind == 'function':
-                return args
+            if symbol.name == func_symbol.name and symbol.kind == 'function':
+                break
             if symbol.kind == 'function':
                 args = []
             else:
                 args.append(symbol)
+        return args[-func_symbol.args_count:]
 
 
 class ThreeCodeGenerator:
@@ -61,7 +64,7 @@ class ThreeCodeGenerator:
     last_temp_address = 9000
 
     def __init__(self):
-        self.i = 1
+        self.i = 0
         self.semantic_errors = []
         self.semantic_stack = []
         self.program_block = []
@@ -108,7 +111,7 @@ class ThreeCodeGenerator:
         elif action_symbol == '#jpf_if':
             self.jpf_if()
         elif action_symbol == '#jpf_save_if':
-            self.jpf_save_if()
+            self.jpf_save_if(current_token)
         elif action_symbol == '#jp_if':
             self.jp_if()
         elif action_symbol == '#repeat_start':
@@ -155,19 +158,21 @@ class ThreeCodeGenerator:
         if not DEBUG:
             debug = ''
         if line:
-            self.program_block[line - 1] = f'{line}\t({command}, {arg1}, {arg2}, {arg3}){debug}'
+            self.program_block[line] = f'{line}\t({command}, {arg1}, {arg2}, {arg3}){debug}'
         else:
             self.program_block.append(f'{self.i}\t({command}, {arg1}, {arg2}, {arg3}){debug}')
             self.i += 1
 
     def begin(self):
         self.add_code_to_program_block('ASSIGN', arg1='#1', arg2=self.RETURN_VALUE_REGISTER, debug='#begin')
+        self.add_code_to_program_block('ASSIGN', arg1='#1', arg2=self.RETURN_ADDRESS_REGISTER, debug='#begin')
 
     def end(self):
         for line in self.main_return_stack:
             self.add_code_to_program_block('JP', arg1=self.i, line=line, debug='#return')
         self.main_return_stack = []
         self.add_code_to_program_block('ASSIGN', arg1='#6000', arg2='3000', debug='#END')
+        print('end', self.semantic_stack)
 
     def create_symbol(self, current_token):
         # we don't know the kind(var,array,function,reference) of the symbol yet
@@ -251,13 +256,13 @@ class ThreeCodeGenerator:
             exp = f'@{exp}'
         self.add_code_to_program_block('JPF', arg1=exp, arg2=self.i, line=line, debug='#jpf_if')
 
-    def jpf_save_if(self):
+    def jpf_save_if(self, current_token):
+        print(current_token.line, self.semantic_stack)
         line = self.semantic_stack.pop()
         exp, type = self.semantic_stack.pop()
         if type == 'indirect':
             exp = f'@{exp}'
         self.add_code_to_program_block('JPF', arg1=exp, arg2=self.i + 1, line=line, debug='#jpf_save_if')
-        self.semantic_stack.append(self.i)
         self.save()
 
     def jp_if(self):
@@ -299,8 +304,9 @@ class ThreeCodeGenerator:
             self.push(('output', 'function', None))
         else:
             scope = len(self.SymbolTable.symbol_stack)
+            flag = True
             for symbol in reversed(self.SymbolTable.symbol_table):
-                if symbol.scope == scope or symbol.scope == 1:
+                if (symbol.scope == scope and flag) or symbol.scope == 1:
                     if symbol.name == current_token.content:
                         if symbol.kind == 'var' or symbol.kind == 'array':
                             t = self.get_temp_address()
@@ -311,6 +317,7 @@ class ThreeCodeGenerator:
                         elif symbol.kind == 'function':
                             self.push((symbol.address, 'function', symbol))
                         return
+                    flag = (symbol.kind != 'function')
             self.semantic_errors.append(
                 f"#{current_token.line}: Semantic Error! '{current_token.content}' is not defined'")
 
@@ -393,14 +400,21 @@ class ThreeCodeGenerator:
                     f"#{current_token.line}: Semantic Error! Mismatch in numbers of arguments of '{self.function_to_be_called[-1].name}'")
                 self.function_args = []
                 return
-
-            for symbol in self.SymbolTable.get_function_args(self.function_to_be_called[-1].name):
+            for symbol in self.SymbolTable.get_function_args(self.function_to_be_called[-1]):
+                print(symbol, 'frfr')
                 arg, type = self.function_args.pop()
+                if symbol.reference:
+                    print(arg, type)
+                    type = 'direct'
                 if type == 'indirect':
                     arg = f'@{arg}'
                 self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=symbol.address, debug='#call_func')
-            self.add_code_to_program_block('ASSIGN', arg1=self.i + 2, arg2=self.RETURN_ADDRESS_REGISTER,debug='#call_func')
+            saved_return_address = self.get_temp_address()
+            self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_ADDRESS_REGISTER, arg2=saved_return_address)
+            self.add_code_to_program_block('ASSIGN', arg1=f'#{self.i + 2}', arg2=self.RETURN_ADDRESS_REGISTER,
+                                           debug='#call_func')
             self.add_code_to_program_block('JP', arg1=self.function_to_be_called[-1].address, debug='#call_func')
+            self.add_code_to_program_block('ASSIGN', arg1=saved_return_address, arg2=self.RETURN_ADDRESS_REGISTER)
             t = self.get_temp_address()
             # setting return address
             self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_VALUE_REGISTER, arg2=t, debug='#call_func')
