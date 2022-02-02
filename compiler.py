@@ -20,6 +20,10 @@ def write_to_file(code, errors, tree):
         f = open("semantic_errors.txt", "w", encoding='utf-8')
         f.write(string_to_write.strip())
         f.close()
+
+        f = open("output.txt", "w")
+        f.write('The code has not been generated.')
+        f.close()
     else:
         string_to_write = ''
         for line in code:

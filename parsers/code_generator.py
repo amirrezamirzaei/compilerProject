@@ -15,6 +15,14 @@ class Symbol:
         return f'name={self.name}\t\tkind={self.kind}\targs_count={self.args_count}\ttype={self.type}\tscope={self.scope}\taddress={self.address} reference={self.reference}'
 
 
+class Type:
+    # kind = var or array
+    # address = direct or indirect
+    def __init__(self, kind, address):
+        self.kind = kind
+        self.address = address
+
+
 class SymbolTable:
 
     def __init__(self):
@@ -77,6 +85,8 @@ class ThreeCodeGenerator:
         self.function_args = []
         self.function_pushed_args = []
         self.SymbolTable = SymbolTable()
+
+        self.function_not_found_error = False
 
     def semantic_action(self, action_symbol, current_token):
         # print(action_symbol, self.semantic_stack, self.function_to_be_called)
@@ -318,10 +328,13 @@ class ThreeCodeGenerator:
                             self.push((symbol.address, 'function', symbol))
                         return
                     flag = (symbol.kind != 'function')
+
             self.semantic_errors.append(
                 f"#{current_token.line}: Semantic Error! '{current_token.content}' is not defined'")
+            self.push((6000, 'direct'))  # fake push so we dont get any error
 
     def assign(self, current_token):
+        print(current_token.line, current_token.content)
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
         if type1 == 'indirect':
@@ -346,6 +359,7 @@ class ThreeCodeGenerator:
         arg1, type1 = self.semantic_stack.pop()
         op = '*' if mult else self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
+        print(type1, type2)
         if op == '*':
             op = 'MULT'
         elif op == '+':
@@ -372,7 +386,13 @@ class ThreeCodeGenerator:
         self.push((t, 'direct'))
 
     def start_function(self):
-        address, _, symbol = self.semantic_stack.pop()
+        p = self.semantic_stack.pop()
+        if len(p) != 3:
+            self.function_not_found_error = True
+            print('ERROR FUNCTION NOT FOUND')
+            return
+        self.function_not_found_error = False
+        address, _, symbol = p
 
         if address == 'output':
             print(f'starting function output')
@@ -382,10 +402,15 @@ class ThreeCodeGenerator:
             self.function_to_be_called.append(symbol)
 
     def call_func(self, current_token):
+        if self.function_not_found_error:
+            self.push((6000, 'direct'))  # fake push so we don't get any error
+            self.function_args = []
+            return
         if self.function_to_be_called[-1] == 'output':
             if len(self.function_args) != 1:
                 self.semantic_errors.append(
                     f"#{current_token.line}: Semantic Error! Mismatch in numbers of arguments of 'output'")
+                self.push((6000, 'direct'))  # fake push so we don't get any error
                 self.function_args = []
                 return
             arg, type = self.function_args.pop()
@@ -398,6 +423,7 @@ class ThreeCodeGenerator:
             if len(self.function_args) != self.function_to_be_called[-1].args_count:
                 self.semantic_errors.append(
                     f"#{current_token.line}: Semantic Error! Mismatch in numbers of arguments of '{self.function_to_be_called[-1].name}'")
+                self.push((6000, 'direct'))  # fake push so we don't get any error
                 self.function_args = []
                 return
             for symbol in self.SymbolTable.get_function_args(self.function_to_be_called[-1]):
@@ -422,4 +448,6 @@ class ThreeCodeGenerator:
         self.function_to_be_called.pop()
 
     def add_arg(self):
+        if self.function_not_found_error:
+            return
         self.function_args.append(self.semantic_stack.pop())
