@@ -5,7 +5,7 @@ Declaration -> Declaration-initial Declaration-prime
 Declaration-initial ->  #push Type-specifier #create_symbol ID
 Declaration-prime -> #func_start Fun-declaration-prime
 Declaration-prime -> Var-declaration-prime
-Var-declaration-prime -> ; #set_kind_to_var
+Var-declaration-prime -> ; #set_kind_to_var_declare
 Var-declaration-prime -> [ #set_kind_to_array NUM ] ;
 Fun-declaration-prime ->  #new_scope ( Params ) Compound-stmt #end_func_scope
 Type-specifier -> int

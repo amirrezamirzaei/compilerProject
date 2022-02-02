@@ -1,4 +1,5 @@
-/*==== Sample S3 ====*/
+/*  ===  Recursive Sample 2  === */
+int count;
 int result[50];
 
 
@@ -14,18 +15,18 @@ int f(int a, int result[]) {
             result[a - 1] = 1;
             return 1;
         } else {
-            result[a - 1] = f(a - 2, result) + f(a - 1, 50);
+            result[a - 1] = f(a - 2, result) + f(a - 1, result);
             return result[a - 1];
         } endif endif
     } endif
 }
 
-void main(void) {
+void main ( void ) {
     int i;
-	i = 0;
-    repeat {
+    i = 0;
+	repeat {
         result[i] = 0;
-        i = i + result;
+        i = i + 1;
     } until (i == 49)
     count = 0;
     output(f(40, result));

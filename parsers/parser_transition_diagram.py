@@ -1,6 +1,6 @@
 import json
 
-from parsers.code_generator import ThreeCodeGenerator
+from parsers.code_generator_recursive import ThreeCodeGenerator
 from scanner import Reader, ScannerResult, get_next_token
 from anytree import Node
 from scanner.const import TokenType
@@ -112,13 +112,13 @@ class TransitionDiagram:
         # Var-declaration-prime -> ;
         if token.get_terminal_form() == ';':
             self.parsing_stack.append((';', node))
-            self.parsing_stack.append('#set_kind_to_var')
+            self.parsing_stack.append('#set_kind_to_var_declare')
         # Var-declaration-prime -> [ NUM ] ;
         elif token.get_terminal_form() == '[':
             self.parsing_stack.append((';', node))
             self.parsing_stack.append((']', node))
             self.parsing_stack.append(('NUM', node))
-            self.parsing_stack.append('#set_kind_to_array')
+            self.parsing_stack.append('#set_kind_to_array_declare')
             self.parsing_stack.append(('[', node))
         else:  # error
             self.handle_error_non_terminal('Var-declaration-prime', token, self.parse_Var_declaration_prime, node)

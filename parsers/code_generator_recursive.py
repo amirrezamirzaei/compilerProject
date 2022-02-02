@@ -34,8 +34,6 @@ class SymbolTable:
         self.data_pointer = 3000
 
     def add(self, name, kind=None, type=None):
-        if name == 'fact':
-            raise ValueError(f'recursive escape')
         symbol = Symbol(name, kind=kind, scope=len(self.symbol_stack), type=type)
         self.symbol_table.append(symbol)
         if kind == 'function':
@@ -57,7 +55,7 @@ class SymbolTable:
             if symbol.kind == 'var':
                 return symbol
 
-    def get_function_args(self, func_symbol):
+    def get_function_args(self, func_symbol, all=False):
         args = []
         for symbol in reversed(self.symbol_table):
             if symbol.name == func_symbol.name and symbol.kind == 'function':
@@ -66,13 +64,28 @@ class SymbolTable:
                 args = []
             else:
                 args.append(symbol)
+        if all:
+            return args
         return args[-func_symbol.args_count:]
+
+    def get_last_function_vars_start_and_end_address(self):
+        tmp = self.get_function_args(self.get_last_function(), all=True)
+        if not tmp:
+            return None
+        first_var = tmp[-1]
+        last_var = tmp[0]
+        return first_var.address, last_var.address if (last_var.kind == 'var' or last_var.reference) else (
+                last_var.address + (last_var.args_count - 1) * 4)
 
 
 class ThreeCodeGenerator:
+    DATA_START_ADDRESS = 3000
     RETURN_ADDRESS_REGISTER = 8000
     RETURN_VALUE_REGISTER = 8004
+    STACK_POINTER = 8888
+
     last_temp_address = 9000
+    STACK_START_ADDRESS = 20000
 
     def __init__(self):
         self.i = 0
@@ -108,9 +121,9 @@ class ThreeCodeGenerator:
         elif action_symbol == '#set_kind_to_array':
             self.set_kind_to_array(current_token)
         elif action_symbol == '#set_kind_to_var_declare':
-            self.set_kind_to_var(current_token)
+            self.set_kind_to_var(current_token, initialize=True)
         elif action_symbol == '#set_kind_to_array_declare':
-            self.set_kind_to_array(current_token)
+            self.set_kind_to_array(current_token, initialize=True)
         elif action_symbol == '#new_scope':
             self.new_scope()
         elif action_symbol == '#end_func_scope':
@@ -142,7 +155,7 @@ class ThreeCodeGenerator:
         elif action_symbol == '#pid':
             self.pid(current_token)
         elif action_symbol == '#assign':
-            self.assign(current_token)
+            self.assign()
         elif action_symbol == '#get_array_cell_address':
             self.get_array_cell_address()
         elif action_symbol == '#operation':
@@ -168,6 +181,16 @@ class ThreeCodeGenerator:
     def push(self, p):
         self.semantic_stack.append(p)
 
+    def get_alive_tmps_and_vars(self):
+        alive = []
+        for tmp in self.semantic_stack:
+            if isinstance(tmp, tuple) and len(tmp) == 2 and int(tmp[0]) >= 9000:
+                alive.append(tmp[0])
+        t = self.SymbolTable.get_last_function_vars_start_and_end_address()
+        if not t:
+            return alive
+        return alive + [i for i in range(t[0], t[1] + 4, 4)]
+
     def new_scope(self):
         self.SymbolTable.new_scope()
 
@@ -183,6 +206,8 @@ class ThreeCodeGenerator:
     def begin(self):
         self.add_code_to_program_block('ASSIGN', arg1='#1', arg2=self.RETURN_VALUE_REGISTER, debug='#begin')
         self.add_code_to_program_block('ASSIGN', arg1='#1', arg2=self.RETURN_ADDRESS_REGISTER, debug='#begin')
+        self.add_code_to_program_block('ASSIGN', arg1=f'#{self.STACK_START_ADDRESS}', arg2=self.STACK_POINTER,
+                                       debug='#begin')
 
     def end(self):
         for line in self.main_return_stack:
@@ -209,7 +234,7 @@ class ThreeCodeGenerator:
             for line in self.function_jump_stack:
                 self.add_code_to_program_block('JP', arg1=self.i, line=line, debug='#func_start')
 
-    def set_kind_to_var(self, current_token):
+    def set_kind_to_var(self, current_token, initialize=False):
         symbol = self.SymbolTable.symbol_table[-1]
         symbol.kind = 'var'
 
@@ -219,11 +244,14 @@ class ThreeCodeGenerator:
 
         symbol.address = self.SymbolTable.data_pointer
         self.SymbolTable.data_pointer += 4
+        if initialize:
+            self.add_code_to_program_block('ASSIGN', arg1='#0', arg2=symbol.address)  # initializing var with zero
 
-    def set_kind_to_array(self, current_token):
+    def set_kind_to_array(self, current_token, initialize=False):
         array_size = int(current_token.content)
         symbol = self.SymbolTable.symbol_table[-1]
         symbol.kind = 'array'
+        symbol.args_count = array_size
 
         if symbol.type == 'void':
             self.semantic_errors.append(
@@ -231,6 +259,11 @@ class ThreeCodeGenerator:
 
         symbol.address = self.SymbolTable.data_pointer
         self.SymbolTable.data_pointer += array_size * 4
+
+        if initialize:
+            for i in range(array_size):
+                self.add_code_to_program_block('ASSIGN', arg1='#0',
+                                            arg2=f'{symbol.address + i * 4}')  # initializing array with zeros
 
     def set_kind_to_reference(self, current_token):
         symbol = self.SymbolTable.symbol_table[-1]
@@ -328,7 +361,7 @@ class ThreeCodeGenerator:
                         if symbol.kind == 'var' or symbol.kind == 'array':
                             t = self.get_temp_address()
                             self.add_code_to_program_block('ASSIGN', arg1=f'#{symbol.address}', arg2=t, debug='#pid')
-                            if symbol.reference:  # todo check shavad
+                            if symbol.reference:
                                 self.add_code_to_program_block('ASSIGN', arg1=f'@{t}', arg2=t, debug='#pid')
                             self.push((t, SymbolType(symbol.kind, 'indirect')))
                         elif symbol.kind == 'function':
@@ -340,7 +373,7 @@ class ThreeCodeGenerator:
                 f"#{current_token.line} : Semantic Error! '{current_token.content}' is not defined.")
             self.push((6000, SymbolType('var', 'direct')))  # fake push so we dont get any error
 
-    def assign(self, current_token):
+    def assign(self):
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
         if type1.address == 'indirect':
@@ -358,7 +391,6 @@ class ThreeCodeGenerator:
         t = self.get_temp_address()
         self.add_code_to_program_block('MULT', arg1=arg1, arg2='#4', arg3=t, debug='#array_cell')
         self.add_code_to_program_block('ADD', arg1=arg2, arg2=t, arg3=t, debug='#array_cell')
-        # todo fix
         self.push((t, SymbolType('var', 'indirect')))
 
     def operation(self, current_token, mult=False):
@@ -437,29 +469,44 @@ class ThreeCodeGenerator:
                 self.function_args = []
                 return
 
+            # saving return address
+            saved_return_address = self.get_temp_address()
+            self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_ADDRESS_REGISTER, arg2=saved_return_address)
+            # saving all tmps and func vars in stack
+            tmps_to_be_saved = self.get_alive_tmps_and_vars()
+            tmps_to_be_saved.append(saved_return_address)
+            for tmp_address in tmps_to_be_saved:
+                self.add_code_to_program_block('ASSIGN', arg1=tmp_address, arg2=f'@{self.STACK_POINTER}')
+                self.add_code_to_program_block('ADD', arg1=self.STACK_POINTER, arg2='#4', arg3=self.STACK_POINTER)
+
             for num, symbol in enumerate(self.SymbolTable.get_function_args(self.function_to_be_called[-1])):
                 arg, type = self.function_args.pop()
                 if symbol.kind != type.kind:
                     list_errors.append(
                         f"#{current_token.line} : Semantic Error! Mismatch in type of argument "
-                        f"{self.function_to_be_called[-1].args_count-num} of '{self.function_to_be_called[-1].name}'."
-                        f" Expected '{symbol.kind.replace('var','int')}' but got '{type.kind.replace('var','int')}' instead.")
+                        f"{self.function_to_be_called[-1].args_count - num} of '{self.function_to_be_called[-1].name}'."
+                        f" Expected '{symbol.kind.replace('var', 'int')}' but got '{type.kind.replace('var', 'int')}' instead.")
                     continue
                 if symbol.reference:
                     type.address = 'direct'
                 if type.address == 'indirect':
                     arg = f'@{arg}'
                 self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=symbol.address, debug='#call_func')
-            saved_return_address = self.get_temp_address()
-            self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_ADDRESS_REGISTER, arg2=saved_return_address)
+
+
             self.add_code_to_program_block('ASSIGN', arg1=f'#{self.i + 2}', arg2=self.RETURN_ADDRESS_REGISTER,
                                            debug='#call_func')
             self.add_code_to_program_block('JP', arg1=self.function_to_be_called[-1].address, debug='#call_func')
+
+            # reading temps and func vars from stack
+            for tmp_address in reversed(tmps_to_be_saved):
+                self.add_code_to_program_block('ADD', arg1=self.STACK_POINTER, arg2='#-4', arg3=self.STACK_POINTER)
+                self.add_code_to_program_block('ASSIGN', arg1=f'@{self.STACK_POINTER}', arg2=tmp_address)
+
             self.add_code_to_program_block('ASSIGN', arg1=saved_return_address, arg2=self.RETURN_ADDRESS_REGISTER)
-            t = self.get_temp_address()
-            # setting return address
-            self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_VALUE_REGISTER, arg2=t, debug='#call_func')
-            self.push((t, SymbolType('var', 'direct')))
+            return_value = self.get_temp_address()
+            self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_VALUE_REGISTER, arg2=return_value, debug='#call_func')
+            self.push((return_value, SymbolType('var', 'direct')))
         self.function_to_be_called.pop()
 
         self.semantic_errors += reversed(list_errors)
