@@ -15,12 +15,15 @@ class Symbol:
         return f'name={self.name}\t\tkind={self.kind}\targs_count={self.args_count}\ttype={self.type}\tscope={self.scope}\taddress={self.address} reference={self.reference}'
 
 
-class Type:
+class SymbolType:
     # kind = var or array
     # address = direct or indirect
     def __init__(self, kind, address):
         self.kind = kind
         self.address = address
+
+    def __str__(self):
+        return f'{self.kind} {self.address}'
 
 
 class SymbolTable:
@@ -139,9 +142,9 @@ class ThreeCodeGenerator:
         elif action_symbol == '#get_array_cell_address':
             self.get_array_cell_address()
         elif action_symbol == '#operation':
-            self.operation()
+            self.operation(current_token)
         elif action_symbol == '#multiply':
-            self.operation(mult=True)
+            self.operation(current_token, mult=True)
         elif action_symbol == '#save_num':
             self.save_num(current_token)
         elif action_symbol == '#start_function':
@@ -208,7 +211,7 @@ class ThreeCodeGenerator:
 
         if symbol.type == 'void':
             self.semantic_errors.append(
-                f"#{current_token.line}: Semantic Error! Illegal type of void for '{symbol.name}'")
+                f"#{current_token.line} : Semantic Error! Illegal type of void for '{symbol.name}'.")
 
         symbol.address = self.SymbolTable.data_pointer
         self.SymbolTable.data_pointer += 4
@@ -220,7 +223,7 @@ class ThreeCodeGenerator:
 
         if symbol.type == 'void':
             self.semantic_errors.append(
-                f"#{current_token.line}: Semantic Error! Illegal type of void for '{symbol.name}'")
+                f"#{current_token.line} : Semantic Error! Illegal type of void for '{symbol.name}'.")
 
         symbol.address = self.SymbolTable.data_pointer
         self.SymbolTable.data_pointer += array_size * 4
@@ -228,10 +231,11 @@ class ThreeCodeGenerator:
     def set_kind_to_reference(self, current_token):
         symbol = self.SymbolTable.symbol_table[-1]
         symbol.reference = True
+        symbol.kind = 'array'
 
         if symbol.type == 'void':
             self.semantic_errors.append(
-                f"#{current_token.line}: Semantic Error! Illegal type of void for '{symbol.name}'")
+                f"#{current_token.line} : Semantic Error! Illegal type of void for '{symbol.name}'.")
 
     def end_func_scope(self):
         func = self.SymbolTable.get_last_function()
@@ -253,7 +257,7 @@ class ThreeCodeGenerator:
             self.add_code_to_program_block('', '', debug='#break_repeat')
         else:
             self.semantic_errors.append(
-                f"#{current_token.line}: Semantic Error! No 'repeat ... until' found for 'break'")
+                f"#{current_token.line} : Semantic Error! No 'repeat ... until' found for 'break'.")
 
     def save(self):
         self.push(self.i)
@@ -262,15 +266,14 @@ class ThreeCodeGenerator:
     def jpf_if(self):
         line = self.semantic_stack.pop()
         exp, type = self.semantic_stack.pop()
-        if type == 'indirect':
+        if type.address == 'indirect':
             exp = f'@{exp}'
         self.add_code_to_program_block('JPF', arg1=exp, arg2=self.i, line=line, debug='#jpf_if')
 
     def jpf_save_if(self, current_token):
-        print(current_token.line, self.semantic_stack)
         line = self.semantic_stack.pop()
         exp, type = self.semantic_stack.pop()
-        if type == 'indirect':
+        if type.address == 'indirect':
             exp = f'@{exp}'
         self.add_code_to_program_block('JPF', arg1=exp, arg2=self.i + 1, line=line, debug='#jpf_save_if')
         self.save()
@@ -285,7 +288,7 @@ class ThreeCodeGenerator:
     def until(self):
         exp, type = self.semantic_stack.pop()
         line = self.repeat_stack.pop()
-        if type == 'indirect':
+        if type.address == 'indirect':
             exp = f'@{exp}'
         self.add_code_to_program_block('JPF', arg1=exp, arg2=line, debug='#until')
 
@@ -303,7 +306,7 @@ class ThreeCodeGenerator:
 
     def return_exp(self):
         arg, type = self.semantic_stack.pop()
-        if type == 'indirect':
+        if type.address == 'indirect':
             arg = f'@{arg}'
         self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=self.RETURN_VALUE_REGISTER,
                                        debug='#setting_return_value')
@@ -323,23 +326,22 @@ class ThreeCodeGenerator:
                             self.add_code_to_program_block('ASSIGN', arg1=f'#{symbol.address}', arg2=t, debug='#pid')
                             if symbol.reference:  # todo check shavad
                                 self.add_code_to_program_block('ASSIGN', arg1=f'@{t}', arg2=t, debug='#pid')
-                            self.push((t, 'indirect'))
+                            self.push((t, SymbolType(symbol.kind, 'indirect')))
                         elif symbol.kind == 'function':
                             self.push((symbol.address, 'function', symbol))
                         return
                     flag = (symbol.kind != 'function')
 
             self.semantic_errors.append(
-                f"#{current_token.line}: Semantic Error! '{current_token.content}' is not defined'")
-            self.push((6000, 'direct'))  # fake push so we dont get any error
+                f"#{current_token.line} : Semantic Error! '{current_token.content}' is not defined.")
+            self.push((6000, SymbolType('var', 'direct')))  # fake push so we dont get any error
 
     def assign(self, current_token):
-        print(current_token.line, current_token.content)
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
-        if type1 == 'indirect':
+        if type1.address == 'indirect':
             arg1 = f'@{arg1}'
-        if type2 == 'indirect':
+        if type2.address == 'indirect':
             arg2 = f'@{arg2}'
         self.add_code_to_program_block('ASSIGN', arg1=arg1, arg2=arg2, debug='#assign')
         self.push((f'{arg2}'.replace('@', ''), type2))
@@ -347,19 +349,23 @@ class ThreeCodeGenerator:
     def get_array_cell_address(self):
         arg1, type1 = self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
-        if type1 == 'indirect':
+        if type1.address == 'indirect':
             arg1 = f'@{arg1}'
         t = self.get_temp_address()
         self.add_code_to_program_block('MULT', arg1=arg1, arg2='#4', arg3=t, debug='#array_cell')
         self.add_code_to_program_block('ADD', arg1=arg2, arg2=t, arg3=t, debug='#array_cell')
         # todo fix
-        self.push((t, 'indirect'))
+        self.push((t, SymbolType('var', 'indirect')))
 
-    def operation(self, mult=False):
+    def operation(self, current_token, mult=False):
         arg1, type1 = self.semantic_stack.pop()
         op = '*' if mult else self.semantic_stack.pop()
         arg2, type2 = self.semantic_stack.pop()
-        print(type1, type2)
+        if type1.kind != type2.kind:
+            self.semantic_errors.append(
+                f"#{current_token.line} : Semantic Error! Type mismatch in operands, Got array instead of int.")
+            self.push((6000, SymbolType('var', 'direct')))
+            return
         if op == '*':
             op = 'MULT'
         elif op == '+':
@@ -372,18 +378,18 @@ class ThreeCodeGenerator:
         elif op == '<':
             op = 'LT'
             arg1, type1, arg2, type2 = arg2, type2, arg1, type1
-        if type1 == 'indirect':
+        if type1.address == 'indirect':
             arg1 = f'@{arg1}'
-        if type2 == 'indirect':
+        if type2.address == 'indirect':
             arg2 = f'@{arg2}'
         t = self.get_temp_address()
         self.add_code_to_program_block(op, arg1=arg1, arg2=arg2, arg3=t)
-        self.push((t, 'direct'))
+        self.push((t, SymbolType('var', 'direct')))
 
     def save_num(self, current_token):
         t = self.get_temp_address()
         self.add_code_to_program_block('ASSIGN', arg1=f'#{current_token.content}', arg2=t, debug='#save_num')
-        self.push((t, 'direct'))
+        self.push((t, SymbolType('var', 'direct')))
 
     def start_function(self):
         p = self.semantic_stack.pop()
@@ -402,19 +408,20 @@ class ThreeCodeGenerator:
             self.function_to_be_called.append(symbol)
 
     def call_func(self, current_token):
+        list_errors = []
         if self.function_not_found_error:
-            self.push((6000, 'direct'))  # fake push so we don't get any error
+            self.push((6000, SymbolType('var', 'direct')))  # fake push so we don't get any error
             self.function_args = []
             return
         if self.function_to_be_called[-1] == 'output':
             if len(self.function_args) != 1:
                 self.semantic_errors.append(
-                    f"#{current_token.line}: Semantic Error! Mismatch in numbers of arguments of 'output'")
-                self.push((6000, 'direct'))  # fake push so we don't get any error
+                    f"#{current_token.line} : Semantic Error! Mismatch in numbers of arguments of 'output'.")
+                self.push((6000, SymbolType('var', 'direct')))  # fake push so we don't get any error
                 self.function_args = []
                 return
             arg, type = self.function_args.pop()
-            if type == 'indirect':
+            if type.address == 'indirect':
                 arg = f'@{arg}'
             self.add_code_to_program_block('PRINT', arg1=arg)
             self.push('NULL')
@@ -422,17 +429,23 @@ class ThreeCodeGenerator:
         else:
             if len(self.function_args) != self.function_to_be_called[-1].args_count:
                 self.semantic_errors.append(
-                    f"#{current_token.line}: Semantic Error! Mismatch in numbers of arguments of '{self.function_to_be_called[-1].name}'")
-                self.push((6000, 'direct'))  # fake push so we don't get any error
+                    f"#{current_token.line} : Semantic Error! Mismatch in numbers of arguments of '{self.function_to_be_called[-1].name}'.")
+                self.push((6000, SymbolType('var', 'direct')))  # fake push so we don't get any error
                 self.function_args = []
                 return
-            for symbol in self.SymbolTable.get_function_args(self.function_to_be_called[-1]):
-                print(symbol, 'frfr')
+
+            for num, symbol in enumerate(self.SymbolTable.get_function_args(self.function_to_be_called[-1])):
                 arg, type = self.function_args.pop()
+                if symbol.kind != type.kind:
+                    list_errors.append(
+                        f"#{current_token.line} : Semantic Error! Mismatch in type of argument "
+                        f"{self.function_to_be_called[-1].args_count-num} of '{self.function_to_be_called[-1].name}'."
+                        f" Expected '{symbol.kind.replace('var','int')}' but got '{type.kind.replace('var','int')}' instead.")
+                    continue
                 if symbol.reference:
                     print(arg, type)
-                    type = 'direct'
-                if type == 'indirect':
+                    type.address = 'direct'
+                if type.address == 'indirect':
                     arg = f'@{arg}'
                 self.add_code_to_program_block('ASSIGN', arg1=arg, arg2=symbol.address, debug='#call_func')
             saved_return_address = self.get_temp_address()
@@ -444,8 +457,10 @@ class ThreeCodeGenerator:
             t = self.get_temp_address()
             # setting return address
             self.add_code_to_program_block('ASSIGN', arg1=self.RETURN_VALUE_REGISTER, arg2=t, debug='#call_func')
-            self.push((t, 'direct'))
+            self.push((t, SymbolType('var', 'direct')))
         self.function_to_be_called.pop()
+
+        self.semantic_errors += reversed(list_errors)
 
     def add_arg(self):
         if self.function_not_found_error:
