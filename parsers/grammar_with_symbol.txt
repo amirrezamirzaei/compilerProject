@@ -10,7 +10,6 @@ Var-declaration-prime -> [ #set_kind_to_array NUM ] ;
 Fun-declaration-prime ->  #new_scope ( Params ) Compound-stmt #end_func_scope
 Type-specifier -> int
 Type-specifier -> void
-
 Params -> #push int #create_symbol ID #set_kind_to_var Param-prime Param-list #increase_func_arg
 Params -> void
 Param-list -> #increase_func_arg, Param Param-list
@@ -18,7 +17,6 @@ Param-list -> EPSILON
 Param -> Declaration-initial #set_kind_to_var Param-prime
 Param-prime -> [ #set_kind_to_reference ]
 Param-prime -> EPSILON
-
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list
 Statement-list -> EPSILON
@@ -66,12 +64,9 @@ Factor -> ( Expression )
 Factor -> #pid ID Var-call-prime
 Factor -> #save_num NUM
 Var-call-prime -> Var-prime
-
-
 Var-prime -> [ Expression #get_array_cell_address ]
 Var-call-prime -> #start_function ( Args ) #call_func
 Factor-prime -> #start_function ( Args ) #call_func
-
 Var-prime -> EPSILON
 Factor-prime -> EPSILON
 Factor-zegond -> ( Expression )

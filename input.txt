@@ -1,34 +1,45 @@
-/*  ===  Recursive Sample 2  === */
-int count;
-int result[50];
-
-
-int f(int a, int result[]) {
-    count = count + 1;
-    if(result[a - 1]){
-        return result[a - 1];
-    } else {
-        if (a == 1) {
-            result[a - 1] = 1;
-            return 1;
-        } else if (a == 2){
-            result[a - 1] = 1;
-            return 1;
-        } else {
-            result[a - 1] = f(a - 2, result) + f(a - 1, result);
-            return result[a - 1];
-        } endif endif
-    } endif
+/* === sample 9 ==== */
+int x[10];
+int minloc (  int a[],  int low,  int high 	)
+    {int i; int x;  int k;
+      k = low;
+      x = a[low];
+      i = low + 1;
+      if (i < high) {
+      repeat
+          { if (a[i] < x)
+             { x= a[i];
+               k =  i; } else { } endif
+              i =  i + 1;
+           } until (high < i + 1)
+      } endif
+      return k;
+}
+void sort( int a[], int low, int high) {
+     int i;
+     int k;
+     i = low;
+     if (i < high - 1) {
+     repeat {
+          int t;
+          k = minloc(a,i,high);
+          t = a[k];
+          a[k] = a[i];
+          a[i] =  t;
+          i = i+1;
+      } until (high - 2 < i)
+     } endif
 }
 
-void main ( void ) {
-    int i;
-    i = 0;
-	repeat {
-        result[i] = 0;
-        i = i + 1;
-    } until (i == 49)
-    count = 0;
-    output(f(40, result));
-    output(count);
+void main(void)
+     {  int i;
+       i = 0;
+       repeat
+         { x[i] =  i * i;
+           i = i + 1; } until (9 < i)
+           sort(x,0,10);
+           i = 0;
+           repeat
+              { output(x[i]);
+               i = i + 1;} until (9 < i)
 }
